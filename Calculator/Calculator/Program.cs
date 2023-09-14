@@ -37,9 +37,66 @@ namespace Calculator
              * 3) Umozni uzivateli zadavat i desetinna cisla, tedy prekopej kalkulacku tak, aby umela pracovat s floaty
              */
 
-            //Tento komentar smaz a misto nej zacni psat svuj prdacky kod.
 
+
+            /*
+             * Parenthesis
+             * Exponents
+             * Joint Multiplication
+             * Multiplication
+             * Division
+             * Addition
+             * Subtraction
+             */
+
+
+            while (true) {
+                String input = Console.ReadLine();
+                String editedInput = input;
+                while (editedInput.Contains('-'))
+                {
+                    int index = editedInput.IndexOf('-');
+                    String start = editedInput.Substring(0, index);
+                    String end = editedInput.Substring(index+1);
+                    float startNum = getEndingNumber(start);
+                    float endNum = getStartingNumber(end);
+                    float result = startNum - endNum;
+                    editedInput = editedInput.Substring(0, index - start.Length) + result +  editedInput.Substring(index + end.Length-1);//TODO
+                    Console.WriteLine(result);
+
+                }
+                Console.WriteLine("Test1: " + getEndingNumber(input));
+                Console.WriteLine("Test2: " + getStartingNumber(input));
+            }
             Console.ReadKey(); //Toto nech jako posledni radek, aby se program neukoncil ihned, ale cekal na stisk klavesy od uzivatele.
+        }
+        static float getEndingNumber(String input)//converts "11*2+32" --> 32
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                String sub = input.Substring(i);
+                try
+                {
+                    float num = float.Parse(sub);
+                    return num;
+                }
+                catch (Exception){}
+            }
+            return float.NaN;
+        }
+        static float getStartingNumber(String input)//converts "11*2+32" --> 11
+        {
+            for (int i = input.Length; i >0; i--)
+            {
+                String sub = input.Substring(0,i);
+                try
+                {
+                    float num = float.Parse(sub);
+                    return num;
+                }
+                catch (Exception) {}
+            }
+            return float.NaN;
         }
     }
 }
