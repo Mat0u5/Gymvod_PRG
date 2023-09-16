@@ -18,11 +18,11 @@ namespace ConsoleCalculator
     {
         static bool showCalcProcess = true;
         static bool usePejmdas = true;//if false, use pemdas
+        static String lastAns = "0";
         static void Main(string[] args)
         {
 
             //USING THE PEJMDAS SYSTEM
-
             /* Some testing problems with outside verification
                 2*3+4*6			    	=30
                 (-3)(2)+18/3	    	=0
@@ -46,18 +46,19 @@ namespace ConsoleCalculator
 
             Console.WriteLine("Allowed operations:");
             Console.WriteLine("   - exponentiation   ^");
-            Console.WriteLine("   - multiplication   *,×");
-            Console.WriteLine("   - division         /,÷");
+            Console.WriteLine("   - multiplication   *, ×");
+            Console.WriteLine("   - division         /, ÷");
             Console.WriteLine("   - addition         +");
             Console.WriteLine("   - subtraction      -");
             Console.WriteLine("Saved Variables:");
             Console.WriteLine("   - ans    (value of the last answer)");
+            Console.WriteLine("   - pi");
+            Console.WriteLine("   - e");
             Console.WriteLine("\nExample: > 5*((1-3)^2)+4");
             Console.WriteLine("         ans = 24");
-            String lastAns = "0";
             while (true)
             {
-                String input = unifyBrackets(Console.ReadLine()).Replace("ans", lastAns).Replace(" ", "").Replace("÷", "/").Replace("×", "*");
+                String input = parseInput(Console.ReadLine());
                 //input = juxtaposition(input);
                 String evaledInput = evaluateString(input, showCalcProcess);
                 lastAns = finalizeOutput(evaledInput);
@@ -65,7 +66,12 @@ namespace ConsoleCalculator
             }
             Console.ReadKey();
         }
-
+        static String parseInput(String input)
+        {
+            input = unifyBrackets(input).Replace(".", ",").Replace(" ", "").Replace("÷", "/").Replace("×", "*");
+            input = juxtaposition(input).Replace("ans", lastAns).Replace("pi", Convert.ToString(Math.PI)).Replace("e", Convert.ToString(Math.E));
+            return input;
+        }
         static String evaluateString(String input, bool sendOutput)
         {
             input = evaluateBrackets(input, sendOutput);
@@ -78,6 +84,7 @@ namespace ConsoleCalculator
         }
         static String juxtaposition(String input)
         {
+            input = input.Replace("ans", "(ans)").Replace("pi", "(pi)").Replace("e","(e)");
             if (input.Contains("("))
             {
 
@@ -100,7 +107,7 @@ namespace ConsoleCalculator
                 }
                 input = newInput.Substring(0, newInput.Length - 1);
             }
-            return input;
+            return input.Replace("(ans)", "ans").Replace("(pi)","pi").Replace("(e)","e");
         }
         static String evaluateBrackets(String input, bool sendOutput)
         {
@@ -133,7 +140,7 @@ namespace ConsoleCalculator
                 input = beforeBracket + "[" + evaluateString(inBracketStr, false) + "]" + afterBracket;
                 input = removeDoubledSigns(input);
                 lastEvaledBracket = beforeBracket.Length;
-                if (sendOutput) Console.WriteLine("=> " + unifyBrackets(input));
+                if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input));
                 currentLoop++;
             }
             return input;
@@ -171,7 +178,6 @@ namespace ConsoleCalculator
 
                 String startNumStr = removeBrackets(startNumStrBracketed);
                 String endNumStr = removeBrackets(endNumStrBracketed);
-
                 double startNum = (startNumStr == "") ? double.NaN : double.Parse(startNumStr);
                 double endNum = (endNumStr == "") ? double.NaN : double.Parse(endNumStr);
                 if (sign == "-" && double.IsNaN(startNum) && endNumStrBracketed.StartsWith("(")) startNum = 0;
@@ -195,7 +201,7 @@ namespace ConsoleCalculator
                     input = removeDoubledSigns(input);
                     startAtIndex = 0;
 
-                    if (sendOutput) Console.WriteLine("=> " + unifyBrackets(input));
+                    if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input));
                 }
                 if (sign == "*" || sign == "/") sign = "*/";//to reset the sign for the next round
             }
@@ -267,10 +273,36 @@ namespace ConsoleCalculator
         static String finalizeOutput(String input)
         {
             input = removeBrackets(unifyBrackets(removeDoubledSigns(input)));
-            if (double.TryParse(input, out double result))
+            if (double.TryParse(input, out double ans))
             {
-                input = Convert.ToString(double.Parse(input));
+                //currently only replacing irrationals if the answer is a number
+                Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
+                replaceIrrationals.Add(Math.PI, "pi");
+                replaceIrrationals.Add(Math.E, "e");
+                bool irrReplaced = false;
+                foreach (KeyValuePair<double, String> entry in replaceIrrationals)
+                {
+                    double value = entry.Key;
+                    String valueStr = entry.Value;
+                    double tryMultiply = Math.Round(ans / value, 12);
+                    double tryDivide = Math.Round(value/ans, 12);
+                    if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy))
+                    {
+                        input = ((multiplyBy==1)?"": Convert.ToString(multiplyBy)) +valueStr;
+                        irrReplaced = true;
+                    }
+                    if (int.TryParse(Convert.ToString(tryDivide), out int divideBy))
+                    {
+                        input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
+                        irrReplaced = true;
+                    }
+                }
+
+                if (!irrReplaced) input = Convert.ToString(ans);
             }
+            //irrationals
+
+            //
             return input;
         }
     }
