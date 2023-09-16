@@ -131,52 +131,42 @@ namespace ConsoleCalculator
         {
             foreach (String function in functions)
             {
-                if (input.StartsWith(function + "(") && input.EndsWith(")"))
-                {
-                    String inFunction = input.Substring((function + "(").Length);
-                    inFunction = removeBrackets(inFunction.Substring(0, inFunction.Length - 1));
-                    if (double.TryParse(inFunction, out double inFunctionNum))
-                    {
-                        double result = 0;
-                        double angleInBrackets = inFunctionNum;
-                        if (!useRadians) angleInBrackets = Math.PI * (inFunctionNum / 180.0);
-                        double radToDegree = 1;
-                        if (!useRadians) radToDegree = 180 / Math.PI;
+                if (!input.StartsWith(function + "(") || !input.EndsWith(")")) continue;
 
+                String inFunction = input.Substring((function + "(").Length);
+                inFunction = removeBrackets(inFunction.Substring(0, inFunction.Length - 1));
 
-                        if (function == "sqrt") result = Math.Sqrt(inFunctionNum);
-                        if (function == "abs") result = Math.Abs(inFunctionNum);
-                        if (function == "floor") result = Math.Floor(inFunctionNum);
-                        if (function == "ceiling") result = Math.Ceiling(inFunctionNum);
-                        if (function == "ln") result = Math.Log(inFunctionNum);
-                        if (function == "log") result = Math.Log10(inFunctionNum);
-                        if (function == "sin") result = Math.Sin(angleInBrackets);
-                        if (function == "cos") result = Math.Cos(angleInBrackets);
-                        if (function == "csc") result = 1/Math.Sin(angleInBrackets);
-                        if (function == "sec") result = 1/Math.Cos(angleInBrackets);
-                        if (function == "tg") result = Math.Tan(angleInBrackets);
-                        if (function == "cotg") result = 1 / Math.Tan(angleInBrackets);
-                        if (function == "arcsin") result = Math.Asin(inFunctionNum) * radToDegree;
-                        if (function == "arccos") result = Math.Acos(inFunctionNum) * radToDegree;
-                        if (function == "arctg") result = Math.Atan(inFunctionNum) * radToDegree;
-                        input = Convert.ToString(result);
-                    }
-                    else if (inFunction.Contains(";"))
-                    {
-                        String[] arr = inFunction.Split(';');
-                        bool[] areNums = Array.ConvertAll(arr, s => double.TryParse(s, out double isNum));
-                        bool areAllNums = areNums.All(x => x);
-                        if (areAllNums)
-                        {
-                            double[] inFunctionNums = Array.ConvertAll(arr, s => double.Parse(s));
-                            double result = 0;
-                            if (function == "log") result = Math.Log(inFunctionNums[0], inFunctionNums[1]);
-                            if (function == "round" && int.TryParse(Convert.ToString(inFunctionNums[1]), out int parsedSecond)) result = Math.Round(inFunctionNums[0], parsedSecond);
-                            if (function == "divremainder") result = inFunctionNums[0] % inFunctionNums[1];
-                            input = Convert.ToString(result);
-                        }
-                    }
-                }
+                double result = 0;
+                bool multipleArgs = inFunction.Contains(";");
+                String[] args = (multipleArgs) ? inFunction.Split(';') : new String[] {inFunction};
+                if (!double.TryParse(args[0], out double firstArg)) continue;
+                double degreeToRad = (useRadians) ? 1 : Math.PI / 180.0;
+                double radToDegree = (useRadians) ? 1 : 180 / Math.PI;
+
+                if (function == "sqrt") return Convert.ToString(Math.Sqrt(firstArg));
+                if (function == "abs") return Convert.ToString(Math.Abs(firstArg));
+                if (function == "floor") return Convert.ToString(Math.Floor(firstArg));
+                if (function == "ceiling") return Convert.ToString(Math.Ceiling(firstArg));
+                if (function == "ln") return Convert.ToString(Math.Log(firstArg));
+                if (function == "log" && !multipleArgs) return Convert.ToString(Math.Log10(firstArg));
+                if (function == "sin") return Convert.ToString(Math.Sin(firstArg* degreeToRad));
+                if (function == "cos") return Convert.ToString(Math.Cos(firstArg * degreeToRad));
+                if (function == "csc") return Convert.ToString(1 / Math.Sin(firstArg * degreeToRad));
+                if (function == "sec") return Convert.ToString(1 / Math.Cos(firstArg * degreeToRad));
+                if (function == "tg") return Convert.ToString(Math.Tan(firstArg * degreeToRad));
+                if (function == "cotg") return Convert.ToString(1 / Math.Tan(firstArg * degreeToRad));
+                if (function == "arcsin") return Convert.ToString(Math.Asin(firstArg) * radToDegree);
+                if (function == "arccos") return Convert.ToString(Math.Acos(firstArg) * radToDegree);
+                if (function == "arctg") return Convert.ToString(Math.Atan(firstArg) * radToDegree);
+
+                if (args.Length < 2) continue;
+                if (!double.TryParse(args[1], out double secongArg)) continue;
+
+                if (function == "log") return Convert.ToString(Math.Log(firstArg, secongArg));
+                if (function == "round" && int.TryParse(Convert.ToString(secongArg), out int parsedSecond)) return Convert.ToString(Math.Round(firstArg, parsedSecond));
+                if (function == "divremainder") return Convert.ToString(firstArg % secongArg);
+
+                input = Convert.ToString(result);
             }
             return input;
         }
@@ -184,10 +174,7 @@ namespace ConsoleCalculator
         {
             input = evaluateBrackets(input, sendOutput);//contains juxtaposition() and evaluateFunction()
             String[] order = new String[] { "^", "×", "*/", "+", "-" };
-            foreach (String sign in order)
-            {
-                input = evaluateWithSign(input, sign, sendOutput);
-            }
+            foreach (String sign in order)  input = evaluateWithSign(input, sign, sendOutput);
             return input;
         }
         static String juxtaposition(String input)
@@ -354,10 +341,7 @@ namespace ConsoleCalculator
                 bool result = editedInput.Contains("*") || editedInput.Contains("/");
                 return result;
             }
-            else
-            {
-                return editedInput.Contains(sign);
-            }
+            return editedInput.Contains(sign);
         }
         static String getNumberOnSideOfString(String input, bool sideLeft, bool exponentiating)//converts "11*2+32" --> 11
         {
@@ -413,48 +397,36 @@ namespace ConsoleCalculator
         static String finalizeOutput(String input, bool showIrrationals)
         {
             input = removeBrackets(unifyBrackets(removeDoubledSigns(input)));
-            if (double.TryParse(input, out double ans))
+            if (!double.TryParse(input, out double ans)) return input;
+            if (!showIrrationals) return Convert.ToString(ans);
+            //currently only replacing irrationals if the answer is a number
+            Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
+            replaceIrrationals.Add(Math.PI, "pi");
+            replaceIrrationals.Add(Math.E, "e");
+            replaceIrrationals.Add(Math.Sqrt(2), "sqrt(2)");
+            replaceIrrationals.Add(Math.Sqrt(3), "sqrt(3)");
+            replaceIrrationals.Add(0, "0");//TODO THIS IS SO UGLY       to prevent situation like 1,22460635382238E-16
+            foreach (KeyValuePair<double, String> entry in replaceIrrationals)
             {
-                bool irrReplaced = false;
-                if (showIrrationals)
+                double value = entry.Key;
+                String valueStr = entry.Value;
+                double tryMultiply = double.NaN;
+                double tryDivide = double.NaN;
+                if (value != 0) tryMultiply = Math.Round(ans / value, 12);
+                if (value != 0) tryDivide = Math.Round(value / ans, 12);
+                if (value == 0 && Math.Round(ans, 15) == 0)
                 {
-                    //currently only replacing irrationals if the answer is a number
-                    Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
-                    replaceIrrationals.Add(Math.PI, "pi");
-                    replaceIrrationals.Add(Math.E, "e");
-                    replaceIrrationals.Add(Math.Sqrt(2), "sqrt(2)");
-                    replaceIrrationals.Add(Math.Sqrt(3), "sqrt(3)");
-                    replaceIrrationals.Add(0, "0");//TODO THIS IS SO UGLY       to prevent situation like 1,22460635382238E-16
-                    foreach (KeyValuePair<double, String> entry in replaceIrrationals)
-                    {
-                        double value = entry.Key;
-                        String valueStr = entry.Value;
-                        double tryMultiply = double.NaN;
-                        double tryDivide = double.NaN;
-                        if (value != 0) tryMultiply = Math.Round(ans / value, 12);
-                        if (value != 0) tryDivide = Math.Round(value / ans, 12);
-                        if (value == 0 && Math.Round(ans, 15) == 0)
-                        {
-                            input = "0";
-                            irrReplaced = true;
-                        }
-                        if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
-                        {
-                            input = ((multiplyBy == 1) ? "" : Convert.ToString(multiplyBy)) + valueStr;
-                            irrReplaced = true;
-                        }
-                        if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
-                        {
-                            input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
-                            irrReplaced = true;
-                        }
-                    }
+                    input = "0";
                 }
-                if (!irrReplaced) input = Convert.ToString(ans);
+                if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
+                {
+                    input = ((multiplyBy == 1) ? "" : Convert.ToString(multiplyBy)) + valueStr;
+                }
+                if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
+                {
+                    input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
+                }
             }
-            //irrationals
-
-            //
             return input;
         }
     }
