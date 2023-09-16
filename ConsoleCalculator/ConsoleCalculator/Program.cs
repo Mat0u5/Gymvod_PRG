@@ -19,8 +19,10 @@ namespace ConsoleCalculator
         static bool showCalcProcess = true;
         static bool usePejmdas = true;//if false, use pemdas
         static bool useRadians = false;
-        static String lastAns = "0";
-        static String[] variables = new String[] { "ans", "pi", "e" };
+        static Dictionary<String, String> variables = new Dictionary<String, String>() 
+        {
+            {"ans","0"},{"pi",Convert.ToString(Math.PI)},{"e",Convert.ToString(Math.E)},{"x","0"},{"y","0"},{"z","0"}
+        };
         static String[] functions = new String[] { "sqrt", "abs", "log", "ln", "arcsin", "arccos", "arctg", "sin", "cos", "cotg", "tg" };
         static void Main(string[] args)
         {
@@ -75,22 +77,46 @@ namespace ConsoleCalculator
             Console.WriteLine("   - ans    (value of the last answer)");
             Console.WriteLine("   - pi");
             Console.WriteLine("   - e");
+            Console.WriteLine("   - x=0");
+            Console.WriteLine("   - y=0");
+            Console.WriteLine("   - z=0");
             Console.WriteLine("\nExample: > 5*((1-3)^2)+4");
             Console.WriteLine("         ans = 24");
             while (true)
             {
-                String input = parseInput(Console.ReadLine());
+                String input = Console.ReadLine();
                 //input = juxtaposition(input);
-                String evaledInput = evaluateString(input, showCalcProcess);
-                lastAns = finalizeOutput(evaledInput);
-                Console.WriteLine("ans = " + finalizeOutput(evaledInput) + "\n");
+                if (!input.Contains("="))
+                {
+                    input = parseInput(input);
+                    String evaledInput = evaluateString(input, showCalcProcess);
+                    variables["ans"] = finalizeOutput(evaledInput);
+                    Console.WriteLine("ans = " + finalizeOutput(evaledInput) + "\n");
+                }
+                else
+                {
+                    String varName = input.Split('=')[0].Trim();
+                    String varValue = input.Split('=')[1].Trim();
+                    Console.WriteLine("Set the value of '"+varName+"' to " + varValue + "\n");
+                    if (variables.ContainsKey(varName))
+                    {
+                        variables[varName] = varValue;
+                    }
+                }
             }
             Console.ReadKey();
         }
         static String parseInput(String input)
         {
             input = unifyBrackets(input).Replace(".", ",").Replace(" ", "").Replace("÷", "/").Replace("×", "*");
-            input = juxtaposition(input).Replace("ans", lastAns).Replace("pi", Convert.ToString(Math.PI)).Replace("e", Convert.ToString(Math.E));
+            input = juxtaposition(input);
+
+            foreach (KeyValuePair<String, String> entry in variables)
+            {
+                String varName = entry.Key;
+                String varValue = entry.Value;
+                input = input.Replace(varName, varValue);
+            }
             return input;
         }
         static String evaluateFunction(String input)//is run from evaluateBrackets()  !INPUT HAS TO BE A SINGLE FUNCTION ex. sqrt(2)
@@ -152,8 +178,10 @@ namespace ConsoleCalculator
         }
         static String juxtaposition(String input)
         {
-            foreach (String variable in variables) input = input.Replace(variable, "(" + variable + ")");
             foreach (String function in functions) input = input.Replace(function, "(" + function.ToUpper());
+            foreach (String variable in variables.Keys) input = input.Replace(variable, "(" + variable.ToUpper() + ")");
+
+
 
             if (input.Contains("("))
             {
@@ -196,7 +224,7 @@ namespace ConsoleCalculator
                 }
                 input = newInput.Substring(0, newInput.Length - 1);
             }
-            foreach (String variable in variables) input = input.Replace("(" + variable + ")", variable);
+            foreach (String variable in variables.Keys) input = input.Replace("(" + variable.ToUpper() + ")", variable);
             foreach (String function in functions) input = input.Replace("(" + function.ToUpper(), function);
             return input;
         }
