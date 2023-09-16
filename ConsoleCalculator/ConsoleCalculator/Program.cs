@@ -20,8 +20,8 @@ namespace ConsoleCalculator
         static bool usePejmdas = true;//if false, use pemdas
         static bool useRadians = false;
         static String lastAns = "0";
-        static String[] variables = new String[] {"ans", "pi", "e"};
-        static String[] functions = new String[] {"sqrt", "sin", "cos", "cotg", "tg" };
+        static String[] variables = new String[] { "ans", "pi", "e" };
+        static String[] functions = new String[] { "sqrt", "abs", "log", "ln", "arcsin", "arccos", "arctg", "sin", "cos", "cotg", "tg" };
         static void Main(string[] args)
         {
 
@@ -52,19 +52,25 @@ namespace ConsoleCalculator
                 -10÷(20÷2^2×5÷5)×8-2    =-18
              */
 
-
             Console.WriteLine("Allowed operations:");
             Console.WriteLine("   - exponentiation   ^");
             Console.WriteLine("   - multiplication   *,×");
             Console.WriteLine("   - division         /,÷");
             Console.WriteLine("   - addition         +");
-            Console.WriteLine("   - subtraction      -"); 
+            Console.WriteLine("   - subtraction      -");
             Console.WriteLine("Allowed functions:");
             Console.WriteLine("   - sqrt()");
+            Console.WriteLine("   - abs()");
+            Console.WriteLine("   - ln()");
+            Console.WriteLine("   - log()    (base 10)");
+            Console.WriteLine("   - log(number; base)");
             Console.WriteLine("   - sin()");
             Console.WriteLine("   - cos()");
             Console.WriteLine("   - tg()");
             Console.WriteLine("   - cotg()");
+            Console.WriteLine("   - arcsin()");
+            Console.WriteLine("   - arccos()");
+            Console.WriteLine("   - arctg()");
             Console.WriteLine("Saved Variables:");
             Console.WriteLine("   - ans    (value of the last answer)");
             Console.WriteLine("   - pi");
@@ -89,24 +95,46 @@ namespace ConsoleCalculator
         }
         static String evaluateFunction(String input)//is run from evaluateBrackets()  !INPUT HAS TO BE A SINGLE FUNCTION ex. sqrt(2)
         {
-            foreach (String function in functions) {
-                if (input.StartsWith(function+"(") && input.EndsWith(")")) {
+            foreach (String function in functions)
+            {
+                if (input.StartsWith(function + "(") && input.EndsWith(")"))
+                {
                     String inFunction = input.Substring((function + "(").Length);
-                    inFunction = inFunction.Substring(0, inFunction.Length - 1);
+                    inFunction = removeBrackets(inFunction.Substring(0, inFunction.Length - 1));
                     if (double.TryParse(inFunction, out double inFunctionNum))
                     {
                         double result = 0;
-                        double angleInBrackets = 0;
-                        if (useRadians) angleInBrackets = inFunctionNum;
-                        else angleInBrackets = Math.PI * (inFunctionNum / 180.0);
+                        double angleInBrackets = inFunctionNum;
+                        if (!useRadians) angleInBrackets = Math.PI * (inFunctionNum / 180.0);
+                        double radToDegree = 1;
+                        if (!useRadians) radToDegree = 180 / Math.PI;
 
 
                         if (function == "sqrt") result = Math.Sqrt(inFunctionNum);
+                        if (function == "abs") result = Math.Abs(inFunctionNum);
+                        if (function == "ln") result = Math.Log(inFunctionNum);
+                        if (function == "log") result = Math.Log10(inFunctionNum);
                         if (function == "sin") result = Math.Sin(angleInBrackets);
                         if (function == "cos") result = Math.Cos(angleInBrackets);
                         if (function == "tg") result = Math.Tan(angleInBrackets);
                         if (function == "cotg") result = 1 / Math.Tan(angleInBrackets);
+                        if (function == "arcsin") result = Math.Asin(inFunctionNum) * radToDegree;
+                        if (function == "arccos") result = Math.Acos(inFunctionNum) * radToDegree;
+                        if (function == "arctg") result = Math.Atan(inFunctionNum) * radToDegree;
                         input = Convert.ToString(result);
+                    }
+                    else if (inFunction.Contains(";"))
+                    {
+                        String[] arr = inFunction.Split(';');
+                        bool[] areNums = Array.ConvertAll(arr, s => double.TryParse(s, out double isNum));
+                        bool areAllNums = areNums.All(x => x);
+                        if (areAllNums)
+                        {
+                            double[] inFunctionNums = Array.ConvertAll(arr, s => double.Parse(s));
+                            double result = 0;
+                            if (function == "log") result = Math.Log(inFunctionNums[0], inFunctionNums[1]);
+                            input = Convert.ToString(result);
+                        }
                     }
                 }
             }
@@ -124,7 +152,7 @@ namespace ConsoleCalculator
         }
         static String juxtaposition(String input)
         {
-            foreach(String variable in variables) input = input.Replace(variable,"("+ variable+")");
+            foreach (String variable in variables) input = input.Replace(variable, "(" + variable + ")");
             foreach (String function in functions) input = input.Replace(function, "(" + function.ToUpper());
 
             if (input.Contains("("))
@@ -168,13 +196,12 @@ namespace ConsoleCalculator
                 }
                 input = newInput.Substring(0, newInput.Length - 1);
             }
-            foreach (String variable in variables) input = input.Replace("(" + variable + ")",variable);
+            foreach (String variable in variables) input = input.Replace("(" + variable + ")", variable);
             foreach (String function in functions) input = input.Replace("(" + function.ToUpper(), function);
             return input;
         }
         static String evaluateBrackets(String input, bool sendOutput)
         {
-            //2sqrt(3+1)^3
             input = juxtaposition(input);
             int maxLoop = 100;
             int currentLoop = 0;
@@ -207,7 +234,7 @@ namespace ConsoleCalculator
                     {
                         String functionStr = function + "(" + evaluateString(inBracketStr, false) + ")";
                         String evaluatedFunction = evaluateFunction(functionStr);
-                        input = beforeBracket.Substring(0, beforeBracket.Length-function.Length) + "[" + evaluatedFunction + "]" + afterBracket;
+                        input = beforeBracket.Substring(0, beforeBracket.Length - function.Length) + "[" + evaluatedFunction + "]" + afterBracket;
                         break;
                     }
                 }
@@ -362,14 +389,14 @@ namespace ConsoleCalculator
                     double tryDivide = double.NaN;
                     if (value != 0) tryMultiply = Math.Round(ans / value, 12);
                     if (value != 0) tryDivide = Math.Round(value / ans, 12);
-                    if (value == 0 && Math.Round(ans, 15)==0)
+                    if (value == 0 && Math.Round(ans, 15) == 0)
                     {
                         input = "0";
                         irrReplaced = true;
                     }
                     if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
                     {
-                        input = ((multiplyBy==1) ?"": Convert.ToString(multiplyBy)) +valueStr;
+                        input = ((multiplyBy == 1) ? "" : Convert.ToString(multiplyBy)) + valueStr;
                         irrReplaced = true;
                     }
                     if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
