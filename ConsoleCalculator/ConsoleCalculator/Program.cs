@@ -23,36 +23,12 @@ namespace ConsoleCalculator
         {
             {"ans","0"},{"pi",Convert.ToString(Math.PI)},{"e",Convert.ToString(Math.E)},{"x","0"},{"y","0"},{"z","0"}
         };
-        static String[] functions = new String[] { "sqrt", "abs", "log", "ln", "arcsin", "arccos", "arctg", "sin", "cos", "cotg", "tg" };
+        static String[] functions = new String[] { "sqrt", "abs", "log", "ln", "round", "floor", "ceiling", "divremainder",
+            "arcsin", "arccos", "arctg", "sin", "cos", "cotg", "tg" , "sec", "csc"};
         static void Main(string[] args)
         {
-
             //USING THE PEJMDAS SYSTEM
             //FUNCTIONS USE DEGREES, NOT RADIANS
-
-            /*
-             * TODO add aproximate value to the result if handling irrational numbers
-             */
-
-            /* Some testing problems with outside verification
-                2*3+4*6			    	=30
-                (-3)(2)+18/3	    	=0
-                4+(6-2)^2+1		    	=21
-                8(6-2)/2(5-3)	    	=32
-                (-12)(-3)+8^2	    	=100
-                4/5*25+2		    	=22
-                (-9(2+1))/(-2(-2-1))	=-4.5
-                4(3+1)-2(5-2)		    =10
-                14/(-3-4)			    =-2
-                (2^2-4^2)/(-3-1)	    =3
-                -(-3)+8/4			    =5
-                9^2-8-2^3			    =65
-                (-7-9)(8-4)+4^3/8	    =-56
-                6+3*2-12/4			    =9
-                7(3+2)-5			    =30
-                10×4-2×(4^2÷4)÷2÷(1/2)+9    =41
-                -10÷(20÷2^2×5÷5)×8-2    =-18
-             */
 
             Console.WriteLine("Allowed operations:");
             Console.WriteLine("   - exponentiation   ^");
@@ -61,37 +37,41 @@ namespace ConsoleCalculator
             Console.WriteLine("   - addition         +");
             Console.WriteLine("   - subtraction      -");
             Console.WriteLine("Allowed functions:");
-            Console.WriteLine("   - sqrt()");
-            Console.WriteLine("   - abs()");
-            Console.WriteLine("   - ln()");
-            Console.WriteLine("   - log()    (base 10)");
-            Console.WriteLine("   - log(number; base)");
-            Console.WriteLine("   - sin()");
-            Console.WriteLine("   - cos()");
-            Console.WriteLine("   - tg()");
-            Console.WriteLine("   - cotg()");
-            Console.WriteLine("   - arcsin()");
-            Console.WriteLine("   - arccos()");
-            Console.WriteLine("   - arctg()");
+            Console.WriteLine("   - sqrt(x)\t\t\t- abs(x)\t\t\t- round(number, decimals)");
+            Console.WriteLine("   - floor(x)\t\t\t- ceiling(x)\t\t\t- divremainder(number, divisor)");
+            Console.WriteLine("   - ln(x)\t\t\t- log(x)\t\t\t- log(number; base)");
+            Console.WriteLine("   - sin(x)\t\t\t- arcsin(x)\t\t\t- csc(x)");
+            Console.WriteLine("   - cos(x)\t\t\t- arccos(x)\t\t\t- sec(x)");
+            Console.WriteLine("   - tg(x)\t\t\t- arctg(x)\t\t\t- cotg(x)");
             Console.WriteLine("Saved Variables:");
-            Console.WriteLine("   - ans    (value of the last answer)");
+            Console.WriteLine("   - ans = [value of the last answer]");
             Console.WriteLine("   - pi");
             Console.WriteLine("   - e");
             Console.WriteLine("   - x=0");
             Console.WriteLine("   - y=0");
             Console.WriteLine("   - z=0");
-            Console.WriteLine("\nExample: > 5*((1-3)^2)+4");
-            Console.WriteLine("         ans = 24");
+            Console.WriteLine("\nOutput the whole calculation process? (y/n)");
+            String seeProcess = Console.ReadLine();
+            bool skippedQuestion = true;
+            if (seeProcess.ToLower() == "y" || seeProcess.ToLower() == "n")
+            {
+                skippedQuestion = false;
+                showCalcProcess = (seeProcess.ToLower() == "y") ? true : false;
+                Console.WriteLine("Enter your problem.   example: 5*((1-3)^2)+4\n");
+            }
             while (true)
             {
-                String input = Console.ReadLine();
+                String input = (skippedQuestion) ? seeProcess : Console.ReadLine();
+                skippedQuestion = false;
                 //input = juxtaposition(input);
                 if (!input.Contains("="))
                 {
                     input = parseInput(input);
                     String evaledInput = evaluateString(input, showCalcProcess);
-                    variables["ans"] = finalizeOutput(evaledInput);
-                    Console.WriteLine("ans = " + finalizeOutput(evaledInput) + "\n");
+                    variables["ans"] = finalizeOutput(evaledInput, true);
+
+                    String aproxValue = (finalizeOutput(evaledInput, false) != finalizeOutput(evaledInput, true)) ? "     (= "+finalizeOutput(evaledInput, false)+")" : "";
+                    Console.WriteLine("ans = " + finalizeOutput(evaledInput, true) + aproxValue+"\n");
                 }
                 else
                 {
@@ -115,7 +95,35 @@ namespace ConsoleCalculator
             {
                 String varName = entry.Key;
                 String varValue = entry.Value;
-                input = input.Replace(varName, varValue);
+                List<Char> bannedCharsBeforeVariable = new List<Char>();
+                List<Char> bannedCharsAfterVariable = new List<Char>();
+                //to prevent letter e in sec from getting replaced
+                foreach (String function in functions)
+                {
+                    if (!function.Contains(varName)) continue;
+                    String[] split = function.Split(new String[] { varName }, function.Length, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            bannedCharsBeforeVariable.Add(split[i].ToCharArray()[split[i].ToCharArray().Length - 1]);
+                            continue;
+                        }
+                        if (i == split.Length - 1)
+                        {
+                            bannedCharsAfterVariable.Add(split[i].ToCharArray()[0]);
+                            continue;
+                        }
+                        bannedCharsBeforeVariable.Add(split[i].ToCharArray()[split[i].ToCharArray().Length - 1]);
+                        bannedCharsAfterVariable.Add(split[i].ToCharArray()[0]);
+                    }
+                }
+
+                input = input.Replace(varName, "_" + varValue + "_");
+                foreach (Char bannedChar in bannedCharsBeforeVariable) input = input.Replace(bannedChar + "_" + varValue + "_", bannedChar+varName);
+                foreach (Char bannedChar in bannedCharsAfterVariable) input = input.Replace("_" + varValue + "_"+ bannedChar, varName+ bannedChar);
+                input = input.Replace("_" + varValue + "_", varValue);
+
             }
             return input;
         }
@@ -138,10 +146,14 @@ namespace ConsoleCalculator
 
                         if (function == "sqrt") result = Math.Sqrt(inFunctionNum);
                         if (function == "abs") result = Math.Abs(inFunctionNum);
+                        if (function == "floor") result = Math.Floor(inFunctionNum);
+                        if (function == "ceiling") result = Math.Ceiling(inFunctionNum);
                         if (function == "ln") result = Math.Log(inFunctionNum);
                         if (function == "log") result = Math.Log10(inFunctionNum);
                         if (function == "sin") result = Math.Sin(angleInBrackets);
                         if (function == "cos") result = Math.Cos(angleInBrackets);
+                        if (function == "csc") result = 1/Math.Sin(angleInBrackets);
+                        if (function == "sec") result = 1/Math.Cos(angleInBrackets);
                         if (function == "tg") result = Math.Tan(angleInBrackets);
                         if (function == "cotg") result = 1 / Math.Tan(angleInBrackets);
                         if (function == "arcsin") result = Math.Asin(inFunctionNum) * radToDegree;
@@ -159,6 +171,8 @@ namespace ConsoleCalculator
                             double[] inFunctionNums = Array.ConvertAll(arr, s => double.Parse(s));
                             double result = 0;
                             if (function == "log") result = Math.Log(inFunctionNums[0], inFunctionNums[1]);
+                            if (function == "round" && int.TryParse(Convert.ToString(inFunctionNums[1]), out int parsedSecond)) result = Math.Round(inFunctionNums[0], parsedSecond);
+                            if (function == "divremainder") result = inFunctionNums[0] % inFunctionNums[1];
                             input = Convert.ToString(result);
                         }
                     }
@@ -266,7 +280,7 @@ namespace ConsoleCalculator
                         break;
                     }
                 }
-                if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input));
+                if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input, true));
                 currentLoop++;
             }
             return input;
@@ -327,7 +341,7 @@ namespace ConsoleCalculator
                     input = removeDoubledSigns(input);
                     startAtIndex = 0;
 
-                    if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input));
+                    if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input, true));
                 }
                 if (sign == "*" || sign == "/") sign = "*/";//to reset the sign for the next round
             }
@@ -396,44 +410,46 @@ namespace ConsoleCalculator
         {
             return input.Replace("++", "+").Replace("--", "+").Replace("-+", "-").Replace("+-", "-");
         }
-        static String finalizeOutput(String input)
+        static String finalizeOutput(String input, bool showIrrationals)
         {
             input = removeBrackets(unifyBrackets(removeDoubledSigns(input)));
             if (double.TryParse(input, out double ans))
             {
-                //currently only replacing irrationals if the answer is a number
-                Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
-                replaceIrrationals.Add(Math.PI, "pi");
-                replaceIrrationals.Add(Math.E, "e");
-                replaceIrrationals.Add(Math.Sqrt(2), "sqrt(2)");
-                replaceIrrationals.Add(Math.Sqrt(3), "sqrt(3)");
-                replaceIrrationals.Add(0, "0");//TODO THIS IS SO UGLY       to prevent situation like 1,22460635382238E-16
                 bool irrReplaced = false;
-                foreach (KeyValuePair<double, String> entry in replaceIrrationals)
+                if (showIrrationals)
                 {
-                    double value = entry.Key;
-                    String valueStr = entry.Value;
-                    double tryMultiply = double.NaN;
-                    double tryDivide = double.NaN;
-                    if (value != 0) tryMultiply = Math.Round(ans / value, 12);
-                    if (value != 0) tryDivide = Math.Round(value / ans, 12);
-                    if (value == 0 && Math.Round(ans, 15) == 0)
+                    //currently only replacing irrationals if the answer is a number
+                    Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
+                    replaceIrrationals.Add(Math.PI, "pi");
+                    replaceIrrationals.Add(Math.E, "e");
+                    replaceIrrationals.Add(Math.Sqrt(2), "sqrt(2)");
+                    replaceIrrationals.Add(Math.Sqrt(3), "sqrt(3)");
+                    replaceIrrationals.Add(0, "0");//TODO THIS IS SO UGLY       to prevent situation like 1,22460635382238E-16
+                    foreach (KeyValuePair<double, String> entry in replaceIrrationals)
                     {
-                        input = "0";
-                        irrReplaced = true;
-                    }
-                    if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
-                    {
-                        input = ((multiplyBy == 1) ? "" : Convert.ToString(multiplyBy)) + valueStr;
-                        irrReplaced = true;
-                    }
-                    if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
-                    {
-                        input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
-                        irrReplaced = true;
+                        double value = entry.Key;
+                        String valueStr = entry.Value;
+                        double tryMultiply = double.NaN;
+                        double tryDivide = double.NaN;
+                        if (value != 0) tryMultiply = Math.Round(ans / value, 12);
+                        if (value != 0) tryDivide = Math.Round(value / ans, 12);
+                        if (value == 0 && Math.Round(ans, 15) == 0)
+                        {
+                            input = "0";
+                            irrReplaced = true;
+                        }
+                        if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
+                        {
+                            input = ((multiplyBy == 1) ? "" : Convert.ToString(multiplyBy)) + valueStr;
+                            irrReplaced = true;
+                        }
+                        if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
+                        {
+                            input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
+                            irrReplaced = true;
+                        }
                     }
                 }
-
                 if (!irrReplaced) input = Convert.ToString(ans);
             }
             //irrationals
