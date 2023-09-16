@@ -18,11 +18,20 @@ namespace ConsoleCalculator
     {
         static bool showCalcProcess = true;
         static bool usePejmdas = true;//if false, use pemdas
+        static bool useRadians = false;
         static String lastAns = "0";
+        static String[] variables = new String[] {"ans", "pi", "e"};
+        static String[] functions = new String[] {"sqrt", "sin", "cos", "cotg", "tg" };
         static void Main(string[] args)
         {
 
             //USING THE PEJMDAS SYSTEM
+            //FUNCTIONS USE DEGREES, NOT RADIANS
+
+            /*
+             * TODO add aproximate value to the result if handling irrational numbers
+             */
+
             /* Some testing problems with outside verification
                 2*3+4*6			    	=30
                 (-3)(2)+18/3	    	=0
@@ -46,10 +55,16 @@ namespace ConsoleCalculator
 
             Console.WriteLine("Allowed operations:");
             Console.WriteLine("   - exponentiation   ^");
-            Console.WriteLine("   - multiplication   *, ×");
-            Console.WriteLine("   - division         /, ÷");
+            Console.WriteLine("   - multiplication   *,×");
+            Console.WriteLine("   - division         /,÷");
             Console.WriteLine("   - addition         +");
-            Console.WriteLine("   - subtraction      -");
+            Console.WriteLine("   - subtraction      -"); 
+            Console.WriteLine("Allowed functions:");
+            Console.WriteLine("   - sqrt()");
+            Console.WriteLine("   - sin()");
+            Console.WriteLine("   - cos()");
+            Console.WriteLine("   - tg()");
+            Console.WriteLine("   - cotg()");
             Console.WriteLine("Saved Variables:");
             Console.WriteLine("   - ans    (value of the last answer)");
             Console.WriteLine("   - pi");
@@ -72,9 +87,34 @@ namespace ConsoleCalculator
             input = juxtaposition(input).Replace("ans", lastAns).Replace("pi", Convert.ToString(Math.PI)).Replace("e", Convert.ToString(Math.E));
             return input;
         }
+        static String evaluateFunction(String input)//is run from evaluateBrackets()  !INPUT HAS TO BE A SINGLE FUNCTION ex. sqrt(2)
+        {
+            foreach (String function in functions) {
+                if (input.StartsWith(function+"(") && input.EndsWith(")")) {
+                    String inFunction = input.Substring((function + "(").Length);
+                    inFunction = inFunction.Substring(0, inFunction.Length - 1);
+                    if (double.TryParse(inFunction, out double inFunctionNum))
+                    {
+                        double result = 0;
+                        double angleInBrackets = 0;
+                        if (useRadians) angleInBrackets = inFunctionNum;
+                        else angleInBrackets = Math.PI * (inFunctionNum / 180.0);
+
+
+                        if (function == "sqrt") result = Math.Sqrt(inFunctionNum);
+                        if (function == "sin") result = Math.Sin(angleInBrackets);
+                        if (function == "cos") result = Math.Cos(angleInBrackets);
+                        if (function == "tg") result = Math.Tan(angleInBrackets);
+                        if (function == "cotg") result = 1 / Math.Tan(angleInBrackets);
+                        input = Convert.ToString(result);
+                    }
+                }
+            }
+            return input;
+        }
         static String evaluateString(String input, bool sendOutput)
         {
-            input = evaluateBrackets(input, sendOutput);
+            input = evaluateBrackets(input, sendOutput);//contains juxtaposition() and evaluateFunction()
             String[] order = new String[] { "^", "×", "*/", "+", "-" };
             foreach (String sign in order)
             {
@@ -84,10 +124,11 @@ namespace ConsoleCalculator
         }
         static String juxtaposition(String input)
         {
-            input = input.Replace("ans", "(ans)").Replace("pi", "(pi)").Replace("e","(e)");
+            foreach(String variable in variables) input = input.Replace(variable,"("+ variable+")");
+            foreach (String function in functions) input = input.Replace(function, "(" + function.ToUpper());
+
             if (input.Contains("("))
             {
-
                 String[] split = input.Split('(');
                 for (int i = 0; i < split.Length; i++)
                 {
@@ -107,10 +148,33 @@ namespace ConsoleCalculator
                 }
                 input = newInput.Substring(0, newInput.Length - 1);
             }
-            return input.Replace("(ans)", "ans").Replace("(pi)","pi").Replace("(e)","e");
+            if (input.Contains(")"))
+            {
+                String[] split = input.Split(')');
+                for (int i = 0; i < split.Length; i++)
+                {
+                    String afterBracket = split[i];
+                    if ((getNumberOnSideOfString(afterBracket, true, false) != "" || afterBracket.StartsWith("(")) && !afterBracket.StartsWith("+") && !afterBracket.StartsWith("-") && i != 0)
+                    {
+                        if (usePejmdas) split[i] = "×" + split[i];
+                        else split[i] = "*" + split[i];
+
+                    }
+                }
+                String newInput = "";
+                foreach (String str in split)
+                {
+                    newInput += str + ")";
+                }
+                input = newInput.Substring(0, newInput.Length - 1);
+            }
+            foreach (String variable in variables) input = input.Replace("(" + variable + ")",variable);
+            foreach (String function in functions) input = input.Replace("(" + function.ToUpper(), function);
+            return input;
         }
         static String evaluateBrackets(String input, bool sendOutput)
         {
+            //2sqrt(3+1)^3
             input = juxtaposition(input);
             int maxLoop = 100;
             int currentLoop = 0;
@@ -132,14 +196,21 @@ namespace ConsoleCalculator
                     }
                 }
                 String inBracketStr = bracketStr.Substring(1, bracketStr.Length - 2);//contents of the bracket
-                /*if (double.TryParse(inBracketStr, out double result))
-                {
-                }*/
                 String beforeBracket = input.Substring(0, bracketStartIndex);
                 String afterBracket = input.Substring(bracketStartIndex + bracketStr.Length);
                 input = beforeBracket + "[" + evaluateString(inBracketStr, false) + "]" + afterBracket;
                 input = removeDoubledSigns(input);
                 lastEvaledBracket = beforeBracket.Length;
+                foreach (String function in functions)
+                {
+                    if (beforeBracket.EndsWith(function))
+                    {
+                        String functionStr = function + "(" + evaluateString(inBracketStr, false) + ")";
+                        String evaluatedFunction = evaluateFunction(functionStr);
+                        input = beforeBracket.Substring(0, beforeBracket.Length-function.Length) + "[" + evaluatedFunction + "]" + afterBracket;
+                        break;
+                    }
+                }
                 if (sendOutput) Console.WriteLine("=> " + finalizeOutput(input));
                 currentLoop++;
             }
@@ -279,19 +350,29 @@ namespace ConsoleCalculator
                 Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
                 replaceIrrationals.Add(Math.PI, "pi");
                 replaceIrrationals.Add(Math.E, "e");
+                replaceIrrationals.Add(Math.Sqrt(2), "sqrt(2)");
+                replaceIrrationals.Add(Math.Sqrt(3), "sqrt(3)");
+                replaceIrrationals.Add(0, "0");//TODO THIS IS SO UGLY       to prevent situation like 1,22460635382238E-16
                 bool irrReplaced = false;
                 foreach (KeyValuePair<double, String> entry in replaceIrrationals)
                 {
                     double value = entry.Key;
                     String valueStr = entry.Value;
-                    double tryMultiply = Math.Round(ans / value, 12);
-                    double tryDivide = Math.Round(value/ans, 12);
-                    if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy))
+                    double tryMultiply = double.NaN;
+                    double tryDivide = double.NaN;
+                    if (value != 0) tryMultiply = Math.Round(ans / value, 12);
+                    if (value != 0) tryDivide = Math.Round(value / ans, 12);
+                    if (value == 0 && Math.Round(ans, 15)==0)
                     {
-                        input = ((multiplyBy==1)?"": Convert.ToString(multiplyBy)) +valueStr;
+                        input = "0";
                         irrReplaced = true;
                     }
-                    if (int.TryParse(Convert.ToString(tryDivide), out int divideBy))
+                    if (int.TryParse(Convert.ToString(tryMultiply), out int multiplyBy) && multiplyBy != 0)
+                    {
+                        input = ((multiplyBy==1) ?"": Convert.ToString(multiplyBy)) +valueStr;
+                        irrReplaced = true;
+                    }
+                    if (int.TryParse(Convert.ToString(tryDivide), out int divideBy) && divideBy != 0)
                     {
                         input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
                         irrReplaced = true;
