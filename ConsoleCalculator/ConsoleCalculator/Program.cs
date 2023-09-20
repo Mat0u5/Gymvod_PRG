@@ -29,28 +29,29 @@ namespace ConsoleCalculator
         {
             //USING THE PEJMDAS SYSTEM
             //FUNCTIONS USE DEGREES, NOT RADIANS
-
-            Console.WriteLine("Allowed operations:");
-            Console.WriteLine("   - exponentiation   ^");
-            Console.WriteLine("   - multiplication   *,×");
-            Console.WriteLine("   - division         /,÷");
-            Console.WriteLine("   - addition         +");
-            Console.WriteLine("   - subtraction      -");
-            Console.WriteLine("Allowed functions:");
-            Console.WriteLine("   - sqrt(x)\t\t\t- abs(x)\t\t\t- round(number, decimals)");
-            Console.WriteLine("   - floor(x)\t\t\t- ceiling(x)\t\t\t- divremainder(number, divisor)");
-            Console.WriteLine("   - ln(x)\t\t\t- log(x)\t\t\t- log(number; base)");
-            Console.WriteLine("   - sin(x)\t\t\t- arcsin(x)\t\t\t- csc(x)");
-            Console.WriteLine("   - cos(x)\t\t\t- arccos(x)\t\t\t- sec(x)");
-            Console.WriteLine("   - tg(x)\t\t\t- arctg(x)\t\t\t- cotg(x)");
-            Console.WriteLine("Saved Variables:");
-            Console.WriteLine("   - ans = [value of the last answer]");
-            Console.WriteLine("   - pi");
-            Console.WriteLine("   - e");
-            Console.WriteLine("   - x=0");
-            Console.WriteLine("   - y=0");
-            Console.WriteLine("   - z=0");
-            Console.WriteLine("\nOutput the whole calculation process? (y/n)");
+            String instructions = "" + 
+            "Allowed operations:\n" +
+            "   - exponentiation   ^\n" +
+            "   - multiplication   *,×\n" +
+            "   - division         /,÷\n" +
+            "   - addition         +\n" +
+            "   - subtraction      -\n" +
+            "Allowed functions:\n" +
+            "   - sqrt(x)\t\t\t- abs(x)\t\t\t- round(number, decimals)\n" +
+            "   - floor(x)\t\t\t- ceiling(x)\t\t\t- divremainder(number, divisor)\n" +
+            "   - ln(x)\t\t\t- log(x)\t\t\t- log(number; base)\n" +
+            "   - sin(x)\t\t\t- arcsin(x)\t\t\t- csc(x)\n" +
+            "   - cos(x)\t\t\t- arccos(x)\t\t\t- sec(x)\n" +
+            "   - tg(x)\t\t\t- arctg(x)\t\t\t- cotg(x)\n" +
+            "Saved Variables:\n" +
+            "   - ans = [value of the last answer]\n" +
+            "   - pi\n" +
+            "   - e\n" +
+            "   - x=0\n" +
+            "   - y=0\n" +
+            "   - z=0\n" +
+            "\nOutput the whole calculation process? (y/n)";
+            Console.WriteLine(instructions);
             String seeProcess = Console.ReadLine();
             bool skippedQuestion = true;
             if (seeProcess.ToLower() == "y" || seeProcess.ToLower() == "n")
@@ -77,7 +78,7 @@ namespace ConsoleCalculator
                 {
                     String varName = input.Split('=')[0].Trim();
                     String varValue = input.Split('=')[1].Trim();
-                    Console.WriteLine("Set the value of '"+varName+"' to " + varValue + "\n");
+                    Console.WriteLine("Set the value of '" + varName + "' to " + varValue + "\n");
                     if (variables.ContainsKey(varName))
                     {
                         variables[varName] = varValue;
@@ -122,7 +123,7 @@ namespace ConsoleCalculator
                 input = input.Replace(varName, "_" + varValue + "_");
                 foreach (Char bannedChar in bannedCharsBeforeVariable) input = input.Replace(bannedChar + "_" + varValue + "_", bannedChar+varName);
                 foreach (Char bannedChar in bannedCharsAfterVariable) input = input.Replace("_" + varValue + "_"+ bannedChar, varName+ bannedChar);
-                input = input.Replace("_" + varValue + "_", varValue);
+                input = input.Replace("_" + varValue + "_", "("+varValue+")");
 
             }
             return input;
@@ -360,6 +361,7 @@ namespace ConsoleCalculator
             }
             if (sideLeft)
             { //getStartingNumber
+
                 for (int i = input.Length; i > 0; i--)
                 {
                     String sub = input.Substring(0, i);
@@ -398,7 +400,7 @@ namespace ConsoleCalculator
         {
             input = removeBrackets(unifyBrackets(removeDoubledSigns(input)));
             if (!double.TryParse(input, out double ans)) return input;
-            if (!showIrrationals) return Convert.ToString(ans);
+            if (!showIrrationals) return Convert.ToString(Math.Round(ans, 10));
             //currently only replacing irrationals if the answer is a number
             Dictionary<double, String> replaceIrrationals = new Dictionary<double, String>();
             replaceIrrationals.Add(Math.PI, "pi");
@@ -427,6 +429,7 @@ namespace ConsoleCalculator
                     input = valueStr + ((divideBy == 1) ? "" : "/" + Convert.ToString(divideBy));
                 }
             }
+            if (double.TryParse(input, out double finalAns)) return Convert.ToString(Math.Round(finalAns, 10));
             return input;
         }
     }
