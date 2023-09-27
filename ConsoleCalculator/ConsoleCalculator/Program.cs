@@ -30,32 +30,33 @@ namespace ConsoleCalculator
             //USING THE PEJMDAS SYSTEM
             //FUNCTIONS USE DEGREES, NOT RADIANS
             String instructions = "" + 
-            "Allowed operations:\n" +
-            "   - exponentiation   ^\n" +
-            "   - multiplication   *,×\n" +
-            "   - division         /,÷\n" +
-            "   - addition         +\n" +
-            "   - subtraction      -\n" +
-            "Allowed functions:\n" +
-            "   - sqrt(x)\t\t\t- abs(x)\t\t\t- round(number, decimals)\n" +
-            "   - floor(x)\t\t\t- ceiling(x)\t\t\t- divremainder(number, divisor)\n" +
-            "   - ln(x)\t\t\t- log(x)\t\t\t- log(number; base)\n" +
-            "   - sin(x)\t\t\t- arcsin(x)\t\t\t- csc(x)\n" +
-            "   - cos(x)\t\t\t- arccos(x)\t\t\t- sec(x)\n" +
-            "   - tg(x)\t\t\t- arctg(x)\t\t\t- cotg(x)\n" +
-            "Saved Variables:\n" +
-            "   - ans = [value of the last answer]\n" +
-            "   - pi\n" +
-            "   - e\n" +
-            "   - x=0\n" +
-            "   - y=0\n" +
-            "   - z=0\n" +
-            "\nOutput the whole calculation process? (y/n)";
+                "Allowed operations:\n" +
+                "   - exponentiation   ^\n" +
+                "   - multiplication   *,×\n" +
+                "   - division         /,÷\n" +
+                "   - addition         +\n" +
+                "   - subtraction      -\n" +
+                "Allowed functions:\n" +
+                "   - sqrt(x)\t\t\t- abs(x)\t\t\t- round(number, decimals)\n" +
+                "   - floor(x)\t\t\t- ceiling(x)\t\t\t- divremainder(number, divisor)\n" +
+                "   - ln(x)\t\t\t- log(x)\t\t\t- log(number; base)\n" +
+                "   - sin(x)\t\t\t- arcsin(x)\t\t\t- csc(x)\n" +
+                "   - cos(x)\t\t\t- arccos(x)\t\t\t- sec(x)\n" +
+                "   - tg(x)\t\t\t- arctg(x)\t\t\t- cotg(x)\n" +
+                "Saved Variables:\n" +
+                "   - ans = [value of the last answer]\n" +
+                "   - pi\n" +
+                "   - e\n" +
+                "   - x=0\n" +
+                "   - y=0\n" +
+                "   - z=0\n" +
+                "\nOutput the whole calculation process? (y/n)";
             Console.WriteLine(instructions);
             String seeProcess = Console.ReadLine();
             bool skippedQuestion = true;
             if (seeProcess.ToLower() == "y" || seeProcess.ToLower() == "n")
             {
+                //whether you want to see the calculation process
                 skippedQuestion = false;
                 showCalcProcess = (seeProcess.ToLower() == "y") ? true : false;
                 Console.WriteLine("Enter your problem.   example: 5*((1-3)^2)+4\n");
