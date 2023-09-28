@@ -17,41 +17,51 @@ namespace RockPaperScissors
         {
             Console.WriteLine("How many round do you want to play?");
             int roundsNum = 0;
-            while (int.TryParse(Console.ReadLine(), out roundsNum) != true) continue;
-            String[] options = new String[] { "rock", "paper", "scissors" };
+            while (int.TryParse(Console.ReadLine(), out roundsNum) != true)
+            {
+                Console.WriteLine("That's not a number. Try again.");
+                continue;
+            }
             Dictionary<String, String> evaluateTable = new Dictionary<String, String>()
+            //The evaluate table keys are the only allowed inputs in the game
+            //The key beats the value    -   {"rock","scissors"}  -> rock beats scissors
                 {
                     { "rock","scissors"},{"paper","rock"},{"scissors","paper"}
                 };
             int playerWins = 0;
             int computerWins = 0;
-            Console.WriteLine("ALLOWED INPUTS: rock, paper, scissors");
+            //print the allowed inputs (all the keys from the evaluateTable)
+            Console.WriteLine("ALLOWED INPUTS: " + string.Join(",", evaluateTable.Keys.ToList()));
+            Random rnd = new Random();
             while (playerWins+computerWins < roundsNum)
             {
                 Console.WriteLine("Enter your input:");
                 String playerInput = Console.ReadLine();
-                if (evaluateTable.ContainsKey(playerInput))
+                //check if player input is valid
+                if (!evaluateTable.ContainsKey(playerInput)) continue;
+                //pick a random computer input (random key from evaluateTable)
+                String computerInput = evaluateTable.Keys.ToArray()[rnd.Next(0, evaluateTable.Keys.Count)];
+                Console.WriteLine("   Computer played " + computerInput);
+                if (evaluateTable[playerInput].Equals(computerInput))
                 {
-                    Random rnd = new Random();
-                    String computerInput = options[rnd.Next(0, options.Length)];
-                    Console.WriteLine("   Computer played " + computerInput);
-                    if (playerInput.Equals(computerInput)) Console.WriteLine("   ---Draw---");
-                    if (evaluateTable[playerInput].Equals(computerInput))
-                    {
-                        Console.WriteLine("   ---You Won---");
-                        playerWins++;
-                    }
-                    if (evaluateTable[computerInput].Equals(playerInput))
-                    {
-                        Console.WriteLine("   ---Computer Won---");
-                        computerWins++;
-                    }
+                    //if the player input matches a key and the computer input matches a value for that key, the player wins
+                    // - {"rock","scissors"}  -> if player plays rock and computer plays scissors, the player wins
+                    Console.WriteLine("   ---You Won---");
+                    playerWins++;
                 }
+                else if (evaluateTable[computerInput].Equals(playerInput))
+                {
+                    //if the computer input matches a key and the player input matches a value for that key, the computer wins
+                    // - {"rock","scissors"}  -> if computer plays rock and player plays scissors, the computer wins
+                    Console.WriteLine("   ---The computer Won---");
+                    computerWins++;
+                }
+                else Console.WriteLine("   ---Draw---");
             }
-            String result = "("+ playerWins  + ", " + computerWins+ ")";
-            if (playerWins == computerWins) Console.WriteLine("\n---\nITS A DRAW! "+ result + "\n---");
-            if (playerWins > computerWins) Console.WriteLine("\n---\nYOU WON! "+ result + "\n---");
-            if (playerWins < computerWins) Console.WriteLine("\n---\nYOU LOST "+ result + "\n---");
+            String roundsResult = "("+ playerWins  + ", " + computerWins+ ")";
+            if (playerWins == computerWins) Console.WriteLine("\n---\nITS A DRAW! "+ roundsResult + "\n---");
+            if (playerWins > computerWins) Console.WriteLine("\n---\nYOU WON! "+ roundsResult + "\n---");
+            if (playerWins < computerWins) Console.WriteLine("\n---\nYOU LOST! "+ roundsResult + "\n---");
             Console.ReadKey();
         }
     }
