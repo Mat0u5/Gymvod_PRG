@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,14 +25,16 @@ namespace RecursionPlayground
 
         static int Factorial(int n)
         {
-            // TODO: Urci ukoncovaci podminku pro faktorial a zavolej Factorial zevnitr se spravnym parametrem / vypoctem.
-            return 0; // TODO: Uprav, aby Factorial vracel spravnou hodnotu.
+            int result = 1;
+            for (int i = n; i > 0; i--) result *= i;
+            return result;
         }
 
         static int Fibonacci(int n)
         {
-            // TODO: Urci ukoncovaci podminku pro Fibonacciho a zavolej Fibonacci zevnitr se spravnym parametrem / vypoctem.
-            return 0; // TODO: Uprav, aby Fibonacci vracel spravnou hodnotu.
+            List<int> ints = new List<int>() {0,1};
+            while(ints.Count <= n) ints.Add(ints[ints.Count - 1] + ints[ints.Count - 2]);
+            return (n > 0) ? ints[n] : -1;
         }
     }
 }
