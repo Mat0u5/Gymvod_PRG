@@ -16,37 +16,39 @@ namespace ArrayPlayground
         static void Main(string[] args)
         {
             //TODO 1: Vytvoř integerové pole a naplň ho pěti čísly.
-
-
+            int[] nums = { 0, 1, 2, 3, 4 };
             //TODO 2: Vypiš do konzole všechny prvky pole, zkus klasický for, kde i využiješ jako index v poli, a foreach (vysvětlíme si).
-
-
-            //TODO 3: Spočti sumu všech prvků v poli a vypiš ji uživateli.
-            int sum;
-
-
-            //TODO 4: Spočti průměr prvků v poli a vypiš ho do konzole.
-            int average;
-
-
-            //TODO 5: Najdi maximum v poli a vypiš ho do konzole.
-            int max;
-
-
-            //TODO 6: Najdi minimum v poli a vypiš ho do konzole.
-            int min;
-
-
-            //TODO 7: Vyhledej v poli číslo, které zadá uživatel, a vypiš index nalezeného prvku do konzole.
-            int index;
-
-            //TODO 8: Změň tvorbu integerového pole tak, že bude obsahovat 100 náhodně vygenerovaných čísel od 0 do 9. Vytvoř si na to proměnnou typu Random.
-
-            //TODO 9: Spočítej kolikrát se každé číslo v poli vyskytuje a spočítané četnosti vypiš do konzole.
+            foreach (var num in nums)
+            {
+                Console.WriteLine(num);
+            }
+            int sum = nums.Sum();
+            double average = nums.Average();
+            int max = nums.Min();
+            int min = nums.Max();
+            Console.WriteLine("What number do you want to find?");
+            int input = 0;
+            while (true)
+            {
+                if (int.TryParse(Console.ReadLine(), out input)); break;
+            }
+            int index = Array.IndexOf(nums,input);
+            Console.WriteLine($"Array Properties:\n\tSum: {sum}\n\tAverage: {average}\n\tMax: {max}\n\tMin: {min}\n\tIndex of your input: {index}");
+            Random rnd = new Random();
+            int[] numsTwo = new int[100];
+            for (int i = 0; i < numsTwo.Count(); i++)
+            {
+                numsTwo[i] = rnd.Next(10);
+            }
             int[] counts = new int[10];
+            for (int i = 0; i < 10; i++)
+            {
+                counts[i] = numsTwo.ToList().Where(x => x==i).Count();
+                Console.WriteLine($"Number of '{i}': " + counts[i]);
+            }
 
-            //TODO 10: Vytvoř druhé pole, do kterého zkopíruješ prvky z prvního pole v opačném pořadí.
-
+            int[] numsTwoReversed = numsTwo;
+            Array.Reverse(numsTwoReversed);
 
             Console.ReadKey();
         }
