@@ -25,22 +25,25 @@ namespace SearchPlayground
         {
             int lowerBound = 0;
             int upperBound = array.Length -1;
-            int middle = Convert.ToInt32((upperBound - lowerBound) / 2) + lowerBound;
             int cycles = 0;
-            while (elementToSearch != array[middle] && cycles < array.Length)
+            while (lowerBound <= upperBound)
             {
-                middle = Convert.ToInt32((upperBound - lowerBound) / 2) + lowerBound;
-                if (array[middle] > elementToSearch) upperBound = middle-1;
-                if (array[middle] < elementToSearch) lowerBound = middle+1;
+                int middle = (upperBound + lowerBound) / 2;
+                if (array[middle] == elementToSearch)
+                {
+                    Console.WriteLine($"binary search cycles: {cycles}");
+                    return middle;
+                }
+                else if (array[middle] > elementToSearch) upperBound = middle - 1;
+                else if (array[middle] < elementToSearch) lowerBound = middle + 1;
                 cycles++;
             }
-            Console.WriteLine($"binary search cycles: {cycles}");
-            return middle;
+            return -1;
         }
 
         static int BinarySearchRecursive(int[] array, int elementToSearch, int lower, int upper)
         {
-            int middle = Convert.ToInt32((upper - lower) / 2) + lower;
+            int middle = (upper + lower) / 2;
             if (array[middle] == elementToSearch) return middle;
             else if (array[middle] > elementToSearch) return BinarySearchRecursive(array, elementToSearch, lower, middle - 1);
             else if (array[middle] < elementToSearch) return BinarySearchRecursive(array,elementToSearch, middle + 1, upper);
