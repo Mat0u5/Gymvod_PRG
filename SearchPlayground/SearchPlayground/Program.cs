@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,35 +11,39 @@ namespace SearchPlayground
     {
         static int LinearSearch(int[] array, int elementToSearch)
         {
-            /*
-             * TODO: naimplementuj lineární vyhledávání (nebo ho zkopíruj z ArrayPlayground z TODO 7)
-             * Projdi for cyklem celé pole od začátku do konce (0 až array.Length - 1) a u každého prvku zkontroluj, jestli se nerovná hledanému prvku.
-             * Pokud ano, vrať jeho index (Který se rovná i počtu prvků, které jsi prošel, než jsi požadované číslo našel.)
-             */
+            for (int i = 0; i < array.Length-1;i++)
+            {
+                if (array[i] == elementToSearch)
+                {
+                    return i;
+                }
+            }
             return -1;
         }
 
         static int BinarySearch(int[] array, int elementToSearch)
         {
-            /*
-             * TODO: naimplementuj binární vyhledávání
-             * Budeš potřebovat několik proměnných:
-             * - jednu na index dolního okraje intervalu
-             * - jednu na index horního okraje intervalu
-             * - jednu na index prostředku intervalu
-             * Na začátku nastav dolní okraj na 0 (první prvek pole) a horní okraj na array.Length - 1 (poslední prvek pole)
-             * Potom v cyklu (dokud se horní a dolní index nepotkají) spočítej prostředek, zkontroluj, jestli na prostředním indexu není hledaný prvek
-             * a případně uprav horní nebo dolní okraj podle toho, jestli je prvek na prostředním indexu větší, nebo menší, než hledaný prvek.
-             * 
-             * Až ti bude binary search fungovat, přidej k němu proměnnou, která ti bude počítat, kolikrát jsi musel rozdělit interval, než jsi prvek našel
-             * a před returnem ho vypiš uživateli do konzole.
-             */
-            return -1;
+            int lowerBound = 0;
+            int upperBound = array.Length -1;
+            int middle = Convert.ToInt32((upperBound - lowerBound) / 2) + lowerBound;
+            int cycles = 0;
+            while (elementToSearch != array[middle] && cycles < array.Length)
+            {
+                middle = Convert.ToInt32((upperBound - lowerBound) / 2) + lowerBound;
+                if (array[middle] > elementToSearch) upperBound = middle-1;
+                if (array[middle] < elementToSearch) lowerBound = middle+1;
+                cycles++;
+            }
+            Console.WriteLine($"binary search cycles: {cycles}");
+            return middle;
         }
 
         static int BinarySearchRecursive(int[] array, int elementToSearch, int lower, int upper)
         {
-            //TODO naimplementuj binární vyhledávání rekurzivním způsobem (Zamysli se nad parametry, které tato funkce přijímá vzpomeň si na přístup Rozděl a Panuj.)
+            int middle = Convert.ToInt32((upper - lower) / 2) + lower;
+            if (array[middle] == elementToSearch) return middle;
+            else if (array[middle] > elementToSearch) return BinarySearchRecursive(array, elementToSearch, lower, middle - 1);
+            else if (array[middle] < elementToSearch) return BinarySearchRecursive(array,elementToSearch, middle + 1, upper);
             return -1;
         }
 
@@ -91,14 +96,17 @@ namespace SearchPlayground
 
         static void Main(string[] args)
         {
+
+            
             int[] smallArray = new int[10];
             FillArray(smallArray);
-
+            
             int[] mediumArray = new int[1000];
             FillArray(mediumArray);
 
             int[] largeArray = new int[1000000];
             FillArray(largeArray);
+            
 
             WriteArrayToConsole(smallArray, "Malé pole");
             SearchArray(smallArray, "Malé pole");
@@ -108,7 +116,7 @@ namespace SearchPlayground
 
             //WriteArrayToConsole(largeArray, "Velké pole");
             SearchArray(largeArray, "Velké pole");
-
+            
             Console.ReadKey();
         }
     }
