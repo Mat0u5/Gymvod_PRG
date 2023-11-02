@@ -36,24 +36,24 @@ namespace _2D_Array_Playground
             array = swapColumns(array, 0, 1);
             printArray(array, true);
             //TODO 7: Otoč pořadí prvků na hlavní diagonále (z levého horního rohu do pravého dolního rohu) a vypiš celé pole do konzole po otočení.
-            //array = transposeMain(array);
-            //printArray(array, true);
+            array = transposeMain(array);
+            printArray(array, true);
 
             //TODO 8: Otoč pořadí prvků na vedlejší diagonále (z pravého horního rohu do levého dolního rohu) a vypiš celé pole do konzole po otočení.
-            //array = transposeSecondary(array);
-            //printArray(array, true);
+            array = transposeSecondary(array);
+            printArray(array, true);
 
             Console.ReadKey();
         }
         static int[,] createAndFillArray(int width, int height)
         {
             int[,] array = new int[height, width];
-            int column = 0;
+            int row = 0;
             for (int i = 1; i <= width * height; i++)
             {
-                if ((i - 1) % width == 0 && i != 1) column++;
-                int row = i - 1 - column * width;
-                array[column, row] = i;
+                if ((i - 1) % width == 0 && i != 1) row++;
+                int col = i - 1 - row * width;
+                array[row, col] = i;
             }
             return array;
         }
@@ -71,17 +71,17 @@ namespace _2D_Array_Playground
         }
         static void printArray(int[,] array, bool showChanges)
         {
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int row = 0; row < array.GetLength(0); row++)
             {
                 Console.Write("    ");
-                for (int j = 0; j < array.GetLength(1); j++)
+                for (int col = 0; col < array.GetLength(1); col++)
                 {
-                    String addToEnd = (j != array.GetLength(1) - 1) ? ", " : "";
-                    String printElement = Convert.ToString(array[i, j]) + addToEnd;
+                    String addToEnd = (col != array.GetLength(1) - 1) ? ", " : "";
+                    String printElement = Convert.ToString(array[row, col]) + addToEnd;
                     try
                     {
                         //if the elements from the lastArray (array before last change) dont match, print with red color
-                        if (array[i, j] == lastArray[i, j]) Console.Write(printElement);
+                        if (array[row, col] == lastArray[row, col]) Console.Write(printElement);
                         else WriteColor(printElement, ConsoleColor.Red);
                     }
                     catch (Exception)
@@ -97,72 +97,65 @@ namespace _2D_Array_Playground
         }
         static void printArrayRow(int[,] array, int row)
         {
-            for (int i = 0; i < array.GetLength(1); i++)
+            for (int col = 0; col < array.GetLength(1); col++)
             {
-                Console.Write(array[row, i]);
-                if (i != array.GetLength(1) - 1) Console.Write(", ");
+                Console.Write(array[row, col]);
+                if (col != array.GetLength(1) - 1) Console.Write(", ");
                 else Console.Write("\n\n");
             }
         }
         static void printArrayColumn(int[,] array, int col)
         {
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int row = 0; row < array.GetLength(0); row++)
             {
-                Console.Write(array[i, col]);
-                if (i != array.GetLength(0) - 1) Console.Write(", ");
+                Console.Write(array[row, col]);
+                if (row != array.GetLength(0) - 1) Console.Write(", ");
                 else Console.Write("\n\n");
             }
         }
         static int[,] transposeMain(int[,] array)
         {
-            for (int col = 0; col < 5; col++)
+            int[,] newArray = new int[array.GetLength(1), array.GetLength(0)];
+            for (int row = 0; row < array.GetLength(0); row++)
             {
-                for (int row = 0; row < 5; row++)
+                for (int col = 0; col < array.GetLength(1); col++)
                 {
-                    if (col <= row) continue;
-                    int temp = array[col, row];
-                    array[col, row] = array[row,col];
-                    array[row, col] = temp;
+                    newArray[col,row] = array[row,col];
                 }
             }
-            return array;
+            return newArray;
         }
         static int[,] transposeSecondary(int[,] array)
         {
-            List<int> list = new List<int>() { 0, 1, 2, 3 };
-            int row = 0;
-            while (list.Count > 0)
+            int originalRowsNum = array.GetLength(0);
+            int originalColsNum = array.GetLength(1);
+            int[,] newArray = new int[array.GetLength(1), array.GetLength(0)];
+            for (int row = 0; row < array.GetLength(0); row++)
             {
-                foreach (int col in list)
+                for (int col = 0; col < array.GetLength(1); col++)
                 {
-                    int maxIndex = (col > row) ? col : row;
-                    int moveBy = 4 - maxIndex;
-                    int tempMove = array[row, col];
-                    array[row, col] = array[row + moveBy, col + moveBy];
-                    array[row + moveBy, col + moveBy] = tempMove;
+                    newArray[originalColsNum - 1 - col,originalRowsNum - 1-row] = array[row, col];
                 }
-                list.RemoveAt(list.Count - 1);
-                row++;
             }
-            return array;
+            return newArray;
         }
         static int[,] swapRows(int[,] array, int swapAt, int swapWith)
         {
-            for (int i = 0; i < array.GetLength(1); i++)
+            for (int col = 0; col < array.GetLength(1); col++)
             {
-                int temp = array[swapAt,i];
-                array[swapAt,i] = array[swapWith,i];
-                array[swapWith,i] = temp;
+                int temp = array[swapAt,col];
+                array[swapAt,col] = array[swapWith,col];
+                array[swapWith,col] = temp;
             }
             return array;
         }
         static int[,] swapColumns(int[,] array, int swapAt, int swapWith)
         {
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int row = 0; row < array.GetLength(0); row++)
             {
-                int temp = array[i, swapAt];
-                array[i, swapAt] = array[i, swapWith];
-                array[i, swapWith] = temp;
+                int temp = array[row, swapAt];
+                array[row, swapAt] = array[row, swapWith];
+                array[row, swapWith] = temp;
             }
             return array;
         }
