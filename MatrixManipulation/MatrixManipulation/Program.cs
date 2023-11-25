@@ -28,7 +28,6 @@ namespace MatrixManupulation
                 string input = Console.ReadLine();
                 processInput(input);
             }
-            Console.ReadKey();
         }
         static void processInput(string input)
         {
@@ -50,7 +49,8 @@ namespace MatrixManupulation
             }
             switch (args[0].ToLower())
             {
-                //this is not pretty at all
+                //this is not pretty at all, but i didnt want to have like 30 different functions
+                //doesn't have many comments since you can tell whats going on from the console write lines.
                 case "create":
                 case "createrandom":
                     if (args.Length < 3 || !args[2].Contains(","))
@@ -64,12 +64,12 @@ namespace MatrixManupulation
                         WriteColorLine("The name cannot be a number.", ConsoleColor.Red);
                         break;
                     }
-                    if (!int.TryParse(args[2].Split(',')[0], out int matrixWidth))
+                    if (!int.TryParse(args[2].Split(',')[0], out int matrixWidth) || matrixWidth <=0)
                     {
                         WriteColorLine("Invalid number.", ConsoleColor.Red);
                         break;
                     }
-                    if (!int.TryParse(args[2].Split(',')[1], out int matrixHeight))
+                    if (!int.TryParse(args[2].Split(',')[1], out int matrixHeight) || matrixHeight<=0)
                     {
                         WriteColorLine("Invalid number.", ConsoleColor.Red);
                         break;
@@ -78,6 +78,7 @@ namespace MatrixManupulation
                     bool createRandom = args[0].ToLower() == "createrandom";
                     if (createRandom)
                     {
+                        //creating a randomly filled matrix
                         if (args.Length < 4 || !args[3].Contains(","))
                         {
                             WriteColorLine("Invalid Syntax. Usage:  createRandom  <matrixName>  <matrixWidth>,<matrixHeight>  <rndMin>,<rndMax>", ConsoleColor.Red);
@@ -189,7 +190,7 @@ namespace MatrixManupulation
                     }
                     matrixName = args[1];
                     matrix = matrices[matrixName];
-                    oldMatrix = (int[,])matrix.Clone();
+                    oldMatrix = (int[,])matrix.Clone(); matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
                     matrix = (args[0].ToLower() == "swaprows") ? swapRows(matrix, swap, swapWith) : swapColumns(matrix, swap, swapWith);
                     printMatrixWithChanges(matrix, oldMatrix, matrixName);
                     matrices[matrixName] = matrix;
@@ -197,13 +198,14 @@ namespace MatrixManupulation
                 case "swapentries":
                     if (args.Length < 4 || !args[2].Contains(",") || !args[3].Contains(","))
                     {
-                        WriteColorLine("Invalid Syntax. Usage:  swapEntries  <matrixName>  <x1>,<y1>  <x2>,<y2>", ConsoleColor.Red);
+                        WriteColorLine("Invalid Syntax. Usage:  swapEntries  <matrixName>  <row1>,<col1>  <row2>,<col2>", ConsoleColor.Red);
                         break;
                     }
                     if (!int.TryParse(args[2].Split(',')[0], out int x1)) { WriteColorLine("Invalid number.", ConsoleColor.Red); break; }
                     if (!int.TryParse(args[2].Split(',')[1], out int y1)) { WriteColorLine("Invalid number.", ConsoleColor.Red); break; }
                     if (!int.TryParse(args[3].Split(',')[0], out int x2)) { WriteColorLine("Invalid number.", ConsoleColor.Red); break; }
                     if (!int.TryParse(args[3].Split(',')[1], out int y2)) { WriteColorLine("Invalid number.", ConsoleColor.Red); break; }
+                    x1--;x2--;y1--;y2--;
                     matrixName = args[1];
                     matrix = matrices[matrixName];
                     oldMatrix = (int[,])matrix.Clone();
@@ -226,7 +228,7 @@ namespace MatrixManupulation
                     }
                     matrixName = args[1];
                     matrix = matrices[matrixName];
-                    oldMatrix = (int[,])matrix.Clone();
+                    oldMatrix = (int[,])matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
                     matrix = (args[0].ToLower() == "mirrordiagonalmain") ? mirrorDiagonalMain(matrix) : mirrorDiagonalSecondary(matrix);
                     printMatrixWithChanges(matrix, oldMatrix, matrixName);
                     matrices[matrixName] = matrix;
@@ -246,7 +248,7 @@ namespace MatrixManupulation
                     }
                     matrixName = args[1];
                     matrix = matrices[matrixName];
-                    oldMatrix = (int[,])matrix.Clone();
+                    oldMatrix = (int[,])matrix.Clone(); matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
                     matrix = (args[0].ToLower() == "transposemain") ? transposeMain(matrix) : transposeSecondary(matrix);
                     printMatrixWithChanges(matrix, oldMatrix, matrixName);
                     matrices[matrixName] = matrix;
@@ -270,7 +272,7 @@ namespace MatrixManupulation
                     matrix = matrices[matrixName];
                     if (int.TryParse(args[2], out int operationValue))
                     {
-                        Console.WriteLine("test1");
+                        //Operation between a matrix and a number
                         oldMatrix = (int[,])matrix.Clone();
                         matrix = matrixAndNumberOperations(matrix, operationValue, args[0]);
                         printMatrixWithChanges(matrix, oldMatrix, matrixName);
@@ -278,7 +280,7 @@ namespace MatrixManupulation
                     }
                     else
                     {
-                        Console.WriteLine("test2");
+                        //Operation between two matrices
                         if (!matrices.ContainsKey(args[2]))
                         {
                             WriteColorLine("A matrix with that name (" + args[2] + ") does not exist.", ConsoleColor.Red);
@@ -286,6 +288,7 @@ namespace MatrixManupulation
                         }
                         String matrixTwoName = args[2];
                         int[,] matrixTwo = matrices[matrixTwoName];
+
                         bool areSameSize = matrix.GetLength(0) == matrixTwo.GetLength(0) && matrix.GetLength(1) == matrixTwo.GetLength(1);
                         if ((args[0].ToLower() == "add" || args[0].ToLower() == "subtract") && !areSameSize)
                         {
@@ -298,9 +301,9 @@ namespace MatrixManupulation
                             break;
                         }
 
-                        oldMatrix = (int[,])matrix.Clone();
-                        matrix = matrixOperations(matrix, matrixTwo, args[0]);
-                        printMatrixWithChanges(matrix, oldMatrix, "result");
+                        oldMatrix = (int[,])matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
+                        matrix = matrixOperations((int[,])matrix.Clone(), matrixTwo, args[0]);
+                        printMatrixWithChanges((int[,])matrix.Clone(), oldMatrix, "result");
                         matrices["result"] = matrix;
                     }
                     break;
@@ -330,13 +333,14 @@ namespace MatrixManupulation
                 "  printColumn  <matrixName>  <columnNum>\n" +
                 "  swapRows  <matrixName>  <row1>,<row2>\n" +
                 "  swapColumns  <matrixName>  <col1>,<col2>\n" +
-                "  swapEntries  <matrixName>  <x1>,<y1>  <x2>,<y2>\n" +
+                "  swapEntries  <matrixName>  <row1>,<col1>  <row2>,<col2>\n" +
                 "  mirrorDiagonalMain  <matrixName>\n" +
                 "  mirrorDiagonalSecondary  <matrixName>\n" +
                 "  transposeMain  <matrixName>\n" +
                 "  transposeSecondary  <matrixName>\n" +
                 "  <add/subtract/multiply>  <matrixName>  <number>\n" +
-                "  <add/subtract/multiply>  <matrixName>  <matrix2Name>";
+                "  <add/subtract/multiply>  <matrixName>  <matrix2Name>\n" +
+                "  clear";
             WriteColorLine(instructions, ConsoleColor.Cyan);
         }
         static int[,] createAndFillMatrix(int rows, int cols)//fills the matrix with 1,2,3,...
@@ -353,7 +357,7 @@ namespace MatrixManupulation
             }
             return matrix;
         }
-        static int[,] createRandomMatrix(int rows, int cols, int rndMin, int rndMax)//rndMin and rndMax both inclusive
+        static int[,] createRandomMatrix(int rows, int cols, int rndMin, int rndMax)//fills the matrix with numbers between rndMin and rndMax (both inclusive)
         {
             int[,] matrix = new int[rows, cols];
             int row = 0;
@@ -379,7 +383,7 @@ namespace MatrixManupulation
             Console.Write(value);
             Console.ResetColor();
         }
-        static int getMaxMatrixValueLength(int[,] matrix)//returns the highest length from all matrix entries (for printing alignment)
+        static int getMaxMatrixValueLength(int[,] matrix)//returns the highest length entry from all matrix entries (for printing alignment)
         {
             int maxLength = Convert.ToString(matrix[0, 0]).Length;
             for (int row = 0; row < matrix.GetLength(0); row++)
@@ -395,9 +399,9 @@ namespace MatrixManupulation
         static void printMatrix(int[,] matrix, string matrixName)
         {
             matrixName += " = ";
-            int middle = matrix.GetLength(0) / 2;
-            string emptyName = new string(' ', matrixName.Length);
-            int maxMatrixValueLength = getMaxMatrixValueLength(matrix);
+            int middle = matrix.GetLength(0) / 2;//this will be the row at which the matrixName is shown
+            string emptyName = new string(' ', matrixName.Length);//for alignment
+            int maxMatrixValueLength = getMaxMatrixValueLength(matrix);//for alignment between entries
             for (int row = 0; row < matrix.GetLength(0); row++)
             {
                 Console.Write(" " + ((row == middle) ? matrixName : emptyName));
@@ -417,9 +421,9 @@ namespace MatrixManupulation
         static void printMatrixWithChanges(int[,] matrix, int[,] lastMatrix, string matrixName)//highlights changes with red
         {
             matrixName += " = ";
-            int middle = matrix.GetLength(0) / 2;
-            string emptyName = new string(' ', matrixName.Length);
-            int maxMatrixValueLength = getMaxMatrixValueLength(matrix);
+            int middle = matrix.GetLength(0) / 2;//this will be the row at which the matrixName is shown
+            string emptyName = new string(' ', matrixName.Length);//for alignment
+            int maxMatrixValueLength = getMaxMatrixValueLength(matrix);//for alignment between entries
             for (int row = 0; row < matrix.GetLength(0); row++)
             {
                 Console.Write(" " + ((row == middle) ? matrixName : emptyName));
@@ -544,8 +548,8 @@ namespace MatrixManupulation
         }
         static int[,] swapTwoEntries(int[,] matrix, int[] swapAt, int[] swapWith)
         {
-            if (swapAt[0] < 0 || swapAt[1] < 0 || swapAt[0] >= matrix.GetLength(1) || swapAt[1] >= matrix.GetLength(0) ||
-                swapWith[0] < 0 || swapWith[1] < 0 || swapWith[0] >= matrix.GetLength(1) || swapWith[1] >= matrix.GetLength(0))
+            if (swapAt[0] < 0 || swapAt[1] < 0 || swapAt[1] >= matrix.GetLength(1) || swapAt[0] >= matrix.GetLength(0) ||
+                swapWith[0] < 0 || swapWith[1] < 0 || swapWith[1] >= matrix.GetLength(1) || swapWith[0] >= matrix.GetLength(0))
             {
                 WriteColorLine("Out of bounds of the matrix.", ConsoleColor.Red);
                 return matrix;
@@ -555,11 +559,11 @@ namespace MatrixManupulation
             matrix[swapWith[0], swapWith[1]] = temp;
             return matrix;
         }
-        static int[,] mirrorDiagonalMain(int[,] matrix)//assumes the matrix is square
+        static int[,] mirrorDiagonalMain(int[,] matrix)//flips the entries in the main diagonal
         {
-            int size = matrix.GetLength(0)-1;
-            int middle = matrix.GetLength(0)/2;
-            for (int i = 0; i < middle; i++)
+            int size = Math.Min(matrix.GetLength(0) - 1, matrix.GetLength(1) - 1);
+            int middle = size / 2;
+            for (int i = 0; i <= middle; i++)
             {
                 int temp = matrix[i,i];
                 matrix[i, i] = matrix[size-i,size-i];
@@ -567,15 +571,17 @@ namespace MatrixManupulation
             }
             return matrix;
         }
-        static int[,] mirrorDiagonalSecondary(int[,] matrix)//assumes the matrix is square
+        static int[,] mirrorDiagonalSecondary(int[,] matrix)//flips the entries in the secondary diagonal
         {
-            int size = matrix.GetLength(0) - 1;
-            int middle = matrix.GetLength(0) / 2;
-            for (int i = 0; i < middle; i++)
+            int size = Math.Min(matrix.GetLength(0) - 1, matrix.GetLength(1) - 1);
+            int diff = Math.Max(matrix.GetLength(0) - 1, matrix.GetLength(1) - 1) - size;
+            if (matrix.GetLength(1) < matrix.GetLength(0)) diff = 0;
+            int middle = size / 2;
+            for (int i = 0; i <= middle; i++)
             {
-                int temp = matrix[i, size-i];
-                matrix[i, size-i] = matrix[size - i, i];
-                matrix[size - i, i] = temp;
+                int temp = matrix[i, size - i+diff];
+                matrix[i, size - i + diff] = matrix[size - i, i + diff];
+                matrix[size - i, i + diff] = temp;
             }
             return matrix;
         }
@@ -610,13 +616,11 @@ namespace MatrixManupulation
             }
             else if (operationStr == "multiply")
             {
-
                 int[,] newMatrix = new int[matrix.GetLength(0), matrixTwo.GetLength(1)];
                 for (int r1 = 0; r1 < newMatrix.GetLength(0); r1++)
                 {
                     for (int c1 = 0; c1 < newMatrix.GetLength(1); c1++)
                     {
-                        //r1=0   c1=1     -> 0throw from matrix1    1st col from matrixTwo
                         int finalValue = 0;
                         for (int c2 = 0; c2 < matrix.GetLength(1); c2++)
                         {
