@@ -17,28 +17,59 @@ namespace SortingPlayground
 
         static int[] BubbleSort(int[] array)
         {
-            int[] sortedArray = (int[])array.Clone(); // Řaď v tomto poli, ve kterém je výchoze zkopírováno všechno ze vstupního pole.
-            /*
-             * TODO: Naimplementuj bubble sort.
-             */
+            int[] sortedArray = (int[])array.Clone(); 
+            for (int i = 0; i < sortedArray.Length; i++)
+            {
+                for (int j = 0; j < sortedArray.Length-1; j++)
+                {
+                    if (sortedArray[j+1] < sortedArray[j])
+                    {
+                        int temp = sortedArray[j];
+                        sortedArray[j] = sortedArray[j + 1];
+                        sortedArray[j + 1] = temp;
+                    }
+                }
+            }
             return sortedArray;
         }
 
         static int[] SelectionSort(int[] array)
         {
-            int[] sortedArray = (int[])array.Clone(); // Řaď v tomto poli, ve kterém je výchoze zkopírováno všechno ze vstupního pole.
-            /*
-             * TODO: Naimplementuj selection sort.
-             */
+            int[] sortedArray = (int[])array.Clone();
+            for (int i = 0; i < sortedArray.Length; i++)
+            {
+                int min = sortedArray[i];
+                int lowestNumAtIndex = i;
+                for (int j = i; j < sortedArray.Length; j++)
+                {
+                    if (sortedArray[j] < min)
+                    {
+                        min = sortedArray[j];
+                        lowestNumAtIndex = j;
+                    }
+                }
+                int temp = sortedArray[i];
+                sortedArray[i] = sortedArray[lowestNumAtIndex];
+                sortedArray[lowestNumAtIndex] = temp;
+            }
             return sortedArray;
         }
 
         static int[] InsertionSort(int[] array)
         {
-            int[] sortedArray = (int[])array.Clone(); // Řaď v tomto poli, ve kterém je výchoze zkopírováno všechno ze vstupního pole.
-            /*
-             * TODO: Naimplementuj insertion sort.
-             */
+            int[] sortedArray = (int[])array.Clone();
+            for (int i = 1; i < sortedArray.Length; i++)
+            {
+                for (int j = i; j > 0; j--)
+                {
+                    if (sortedArray[j-1] > sortedArray[j])
+                    {
+                        int temp = sortedArray[j];
+                        sortedArray[j] = sortedArray[j-1];
+                        sortedArray[j-1] = temp;
+                    }
+                }
+            }
             return sortedArray;
         }
 
