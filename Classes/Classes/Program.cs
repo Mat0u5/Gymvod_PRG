@@ -11,6 +11,7 @@ namespace Classes
     {
         static void Main(string[] args)
         {
+            /*
             Human human1 = new Human();
             human1.age = 18;
             human1.name = "Tobias";
@@ -29,9 +30,51 @@ namespace Classes
             Human child = Human.makeChild(human1,human2);
             child.introduceHuman();
             Console.WriteLine($"{child.name}'s skin color: {child.skinColor}");
+            */
+            Animal newAnimal = new Animal();
+            newAnimal.MakeNoise();
 
+            Dog newDog = new Dog();
+            newDog.breed = "p e s";
+            newDog.name = "dogname";
+            newDog.age = 167;
+            Console.WriteLine($"The dog's name is {newDog.name}, it's {newDog.age} years old and it's breed is {newDog.breed}");
+            newDog.MakeNoise();
+
+            Cat newCat = new Cat();
+            newCat.furColour = "white";
+            newCat.name = "catbname";
+            newCat.age = 99999999;
+            Console.WriteLine($"The cat's name is {newCat.name}, it's {newCat.age} years old and it's fur colour is {newCat.furColour}");
+            newCat.MakeNoise();
 
             Console.ReadKey();
+        }
+
+        class Animal
+        {
+            public string name;
+            public int age;
+            public virtual void MakeNoise()
+            {
+                Console.WriteLine("*animal noises*");
+            }
+        }
+        class Dog : Animal
+        {
+            public string breed;
+            public override void MakeNoise()
+            {
+                Console.WriteLine("*bark bark*");
+            }
+        }
+        class Cat : Animal
+        {
+            public string furColour;
+            public override void MakeNoise()
+            {
+                Console.WriteLine("*meeeeeeeeow*");
+            }
         }
 
         class Human
