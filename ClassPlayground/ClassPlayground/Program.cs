@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -66,6 +67,46 @@ namespace ClassPlayground
     {
         static void Main(string[] args)
         {
+            /*
+            Rectangle rect = new Rectangle(5,4);
+            Console.WriteLine(rect.CalculateArea());
+            Console.WriteLine(rect.CalculateAspectRatio());
+            Console.WriteLine(rect.ContainsPoint(3,3));
+            Circle circle = new Circle(1);
+            Console.WriteLine(circle.CalculateArea());
+            Console.WriteLine(circle.ContainsPoint(3, 3));
+            Triangle triangle = new Triangle(5, 4);
+            Console.WriteLine(triangle.CalculateArea());*/
+            /*
+            BankAccount acc1 = new BankAccount("Matouš", "CZK");
+            acc1.writeBalance();
+            acc1.Deposit(10000000000);
+            acc1.writeBalance();
+            acc1.Withdraw(1000);
+            acc1.writeBalance();
+            BankAccount acc2 = new BankAccount("Kryštof", "CZK");
+            acc2.Deposit(10000000);
+            acc2.writeBalance();
+
+            acc1.Transfer(1000000000, acc2);
+
+            acc1.writeBalance();
+            acc2.writeBalance();
+            */
+
+            Student matous = new Student("Matouš", 13);
+            matous.AddSubject("PRG");
+            matous.AddGrade("PRG",1.5,10);
+            matous.AddGrade("PRG", 1, 8);
+
+            matous.AddSubject("Math");
+            matous.AddGrade("Math", 2, 2);
+            matous.AddGrade("Math", 1, 8);
+            Console.WriteLine(matous.CalculateSubjectGrade("PRG"));
+            Console.WriteLine(matous.CalculateSubjectGrade("Math"));
+            Console.WriteLine(matous.CaculateTotalGrade());
+
+
             Console.ReadKey();
         }
     }
