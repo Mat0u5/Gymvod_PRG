@@ -72,6 +72,11 @@ namespace ConsoleSpaceInvaders
         {
             models.Add(model);
         }
+        public void setModel(string model)
+        {
+            models.Clear();
+            addModel(model);
+        }
         private List<StringBuilder> writeOrDeleteScreen(List<StringBuilder> currentScreen, bool deleteNotWrite)
         {
             int currentPosY = posY;
@@ -116,13 +121,20 @@ namespace ConsoleSpaceInvaders
     }
     class LivingEntity : Entity
     {
-        public float health;
+        public int health;
+        public int score = 0;
+        public int extraInfo;
 
 
         public LivingEntity() { }
-        public LivingEntity(float health)
+        public LivingEntity(int health)
         {
             this.health = health;
+        }
+        public LivingEntity(int health, int score)
+        {
+            this.health = health;
+            this.score = score;
         }
         public Entity createProjectile(List<StringBuilder> currentScreen, string projectileModel, int[] shootFrom)
         {
