@@ -22,7 +22,7 @@ namespace ConsoleSpaceInvaders
         public static List<LivingEntity> enemies = new List<LivingEntity>();
         public static LivingEntity player;
         public static LivingEntity ufo;
-        private static List<StringBuilder> lastScreen = new List<StringBuilder>();
+        public static List<StringBuilder> lastScreen = new List<StringBuilder>();
         public static List<StringBuilder> currentScreen = new List<StringBuilder>();
         public static bool gameOn = false;
         public static bool redrawing = false;
@@ -33,6 +33,7 @@ namespace ConsoleSpaceInvaders
         public static int enemyDirection = 1;
         public static int currentProjectileDelay = 0;
 
+        public static Screen screen = new Screen();
 
         static void Main(string[] args)
         {            
@@ -44,7 +45,7 @@ namespace ConsoleSpaceInvaders
         }
         static void startGame()
         {
-            startScreen();
+            screen.startScreen();
 
             Char key = Console.ReadKey().KeyChar;
 
@@ -56,7 +57,7 @@ namespace ConsoleSpaceInvaders
         static void gameOver()
         {
 
-            reWriteLivesAndScore();
+            screen.reWriteLivesAndScore();
             gameOn = false;
             List<LivingEntity> entities = new List<LivingEntity>();
             entities.AddRange(enemies);
@@ -81,12 +82,12 @@ namespace ConsoleSpaceInvaders
             redrawingTwo = false;
             player.setModel(" ▄  ▀   ▄   ▄\n   ▀  ▄  ▀█  \n▄██ █  ▄ █▀█▄\n█████ ███████");
             player.writeToScreen(currentScreen);
-            reDrawPlayer();
+            screen.reDrawPlayer();
             lastScreen = new List<StringBuilder>();
             currentScreen = new List<StringBuilder>();
             Thread.Sleep(500);
 
-            gameOverScreen();
+            screen.gameOverScreen();
             player = null;
             Char key = Console.ReadKey().KeyChar;
             startGame();
@@ -94,33 +95,33 @@ namespace ConsoleSpaceInvaders
         static void mainGameLoop()
         {
             gameOn = true;
-            prepareGameBorder();
-            clearEntireScreen();
+            screen.prepareGameBorder();
+            screen.clearEntireScreen();
             spawnEntities();
             while (gameOn)
             {
                 gameLoopCount++;
                 if (currentProjectileDelay > 0) currentProjectileDelay--;
-                reWriteLivesAndScore();
+                screen.reWriteLivesAndScore();
                 bool redraw = false;
                 if (gameLoopCount % 1 == 0 && projectiles.Count > 0)//projectiles move every 50ms
                 {
-                    bool redrawLocal = projectilesLoop();
-                    if (!redraw) redraw = redrawLocal;
+                    bool redrawProjectiles = projectilesLoop();
+                    if (!redraw && redrawProjectiles) redraw = true;
                 }
                 if (gameLoopCount % 10 == 0)//enemies move every 500 ms
                 {
-                    bool redrawLocal = enemiesLoop();
-                    if (!redraw) redraw = redrawLocal;
+                    bool redrawEnemies = enemiesLoop();
+                    if (!redraw && redrawEnemies) redraw = true;
                 }
-                if (gameLoopCount % 1 == 0)
+                if (gameLoopCount % 1 == 0)//ufo moves every 50ms
                 {
-                    bool redrawLocal = UFOloop();
-                    if (!redraw) redraw = redrawLocal;
+                    bool redrawUFO = UFOloop();
+                    if (!redraw && redrawUFO) redraw = true;
                 }
                 if (redraw)
                 {
-                    reDrawScreen();
+                    screen.reDrawScreen();
                 }
                 Thread.Sleep(50);
             }
@@ -129,57 +130,60 @@ namespace ConsoleSpaceInvaders
         {
             Thread.Sleep(200);
             player.writeToScreen(currentScreen);
-            reDrawPlayer();
+            screen.reDrawPlayer();
             while (gameOn)
             {
-                if (Console.KeyAvailable)
+                Thread.Sleep(20);
+                if (!Console.KeyAvailable) continue;
+                ConsoleKey key = Console.ReadKey().Key;
+                int moveByX = 0;
+                int moveByY = 0;
+                if ((key.Equals(ConsoleKey.LeftArrow) || key.Equals(ConsoleKey.A)) && player.posX > 0) moveByX = -1;//move left
+                if ((key.Equals(ConsoleKey.RightArrow) || key.Equals(ConsoleKey.D)) && player.posX + 15 < width) moveByX = 1;//move right
+
+                if (moveByX != 0 || moveByY != 0)
                 {
-                    ConsoleKey key = Console.ReadKey().Key;
-                    int moveByX = 0;
-                    int moveByY = 0;
-                    if ((key.Equals(ConsoleKey.LeftArrow) || key.Equals(ConsoleKey.A)) && player.posX > 0) moveByX = -1;
-                    if ((key.Equals(ConsoleKey.RightArrow) || key.Equals(ConsoleKey.D)) && player.posX + 15 < width) moveByX = 1;
-                    if (moveByX != 0 || moveByY != 0)
+                    player.removeFromScreen(currentScreen);
+                    player.moveBy(moveByX, moveByY);
+                    player.writeToScreen(currentScreen);
+                    screen.reDrawPlayer();
+                }
+
+
+                //Projectiles
+                if ((key.Equals(ConsoleKey.UpArrow) || key.Equals(ConsoleKey.Spacebar) || key.Equals(ConsoleKey.W)) && currentProjectileDelay == 0)//shoot
+                {
+                    new Beep().BeepBeep(40, 4000, 25);
+                    Thread.Sleep(10);
+                    new Beep().BeepBeep(40, 3500, 25);
+                    currentProjectileDelay = 10;
+                    if (projectiles.Find(p => p.posX == (player.posX + 6) && p.posY == (player.posY - 1)) == null)
                     {
-                        player.removeFromScreen(currentScreen);
-                        player.moveBy(moveByX, moveByY);
-                        player.writeToScreen(currentScreen);
-                        reDrawPlayer();
+                        Entity projectile = player.createProjectile(currentScreen, "↑", new int[] { player.posX + 6, player.posY - 1 });
+                        projectiles.Add(projectile);
                     }
-                    //Projectiles
-                    if ((key.Equals(ConsoleKey.UpArrow) || key.Equals(ConsoleKey.Spacebar) || key.Equals(ConsoleKey.W)) && currentProjectileDelay == 0)
+
+                }
+                if (key.Equals(ConsoleKey.L) && currentProjectileDelay == 0)//Shoots 10 bullets - for developer testing - I left it functional, because why not.
+                {
+                    new Beep().BeepBeep(40, 4000, 25);
+                    Thread.Sleep(10);
+                    new Beep().BeepBeep(40, 3500, 25);
+                    for (int i = -5; i < 6; i++)
                     {
-                        //new Beep().BeepBeep(40, 1000, 50);
-                        //new Beep().BeepBeep(40, 2000, 50);
-                        new Beep().BeepBeep(40, 4000, 25);
-                        Thread.Sleep(10);
-                        new Beep().BeepBeep(40, 3500, 25);
-                        currentProjectileDelay = 10;
-                        if (projectiles.Find(p => p.posX == (player.posX + 6) && p.posY == (player.posY - 1)) == null)
+                        if (projectiles.Find(p => p.posX == (player.posX + 6 + i) && p.posY == (player.posY - 1)) == null)
                         {
-                            Entity projectile = player.createProjectile(currentScreen, "↑", new int[] { player.posX + 6, player.posY - 1 });
+                            Entity projectile = player.createProjectile(currentScreen, "↑", new int[] { player.posX + 6 + i, player.posY - 1 });
                             projectiles.Add(projectile);
                         }
-
                     }
-                    if (key.Equals(ConsoleKey.L) && currentProjectileDelay == 0)//for developer testing - I left it functional, because why not.
-                    {
-                        for (int i = -5; i < 6; i++)
-                        {
-                            if (projectiles.Find(p => p.posX == (player.posX + 6 + i) && p.posY == (player.posY - 1)) == null)
-                            {
-                                Entity projectile = player.createProjectile(currentScreen, "↑", new int[] { player.posX + 6 + i, player.posY - 1 });
-                                projectiles.Add(projectile);
-                            }
-                        }
 
-                    }
                 }
-                Thread.Sleep(5);
             }
         }
         
-        //Entity stuff
+        //Entity manipulation stuff (movement, collisions,...) - I didn't want to create a separate class for this, because I wanted it to be in the Program class for ease of access.
+        //                                                       And it also interacts with every other class, it'd be a mess if I put it into its own class.
         static bool UFOloop()//returns true if Main should redraw the screen
         {
             Random rnd = new Random();
@@ -332,43 +336,45 @@ namespace ConsoleSpaceInvaders
                 bool collision = (!currentScreen[moveToY][moveToX].Equals(' ') && !currentScreen[moveToY][moveToX].Equals('↑'));
                 projectile.moveBy(0, moveDir);
                 projectile.writeToScreen(currentScreen);
-
                 if (!collision) continue; //else collision with entity
-                LivingEntity colidedEnemy = findEntityWithHitboxAt(moveToX, moveToY);
-                if (colidedEnemy == null) continue;
-                if (enemies.Contains(colidedEnemy) && !projectile.models[0].Equals("↑")) continue;
-
-                newProjectiles.Remove(projectile);
-                colidedEnemy.health--;
-                if (colidedEnemy == player)
-                {
-                    new Beep().BeepBeep(40, 150, 500);
-                    Thread.Sleep(10);
-                    new Beep().BeepBeep(40, 100, 500);
-                }
-                if (colidedEnemy.health <= 0)
-                {
-                    score += colidedEnemy.score;
-                    if (colidedEnemy == player)
-                    {
-                        Thread.Sleep(10);
-                        new Beep().BeepBeep(40, 75, 500);
-                        gameOver();
-                    }
-                    else if (colidedEnemy == ufo)
-                    {
-
-                        ufo.removeFromScreen(currentScreen);
-                        ufo = null;
-                    }
-                    else
-                    {
-                        enemies.Remove(colidedEnemy);
-                        colidedEnemy.removeFromScreen(currentScreen);
-                    }
-                }
+                LivingEntity colidedEntity = findEntityWithHitboxAt(moveToX, moveToY);
+                if (colidedEntity == null) continue;
+                if (enemies.Contains(colidedEntity) && !projectile.models[0].Equals("↑")) continue;//to prevent enemies hitting their own
+                handleCollision(projectile, colidedEntity, newProjectiles);
             }
             projectiles = newProjectiles;
+        }
+        static void handleCollision(Entity projectile, LivingEntity colidedEntity, List<Entity> newProjectiles)
+        {
+            newProjectiles.Remove(projectile);
+            colidedEntity.health--;
+            if (colidedEntity == player)
+            {
+                new Beep().BeepBeep(40, 150, 500);
+                Thread.Sleep(10);
+                new Beep().BeepBeep(40, 100, 500);
+            }
+            if (colidedEntity.health <= 0)
+            {
+                score += colidedEntity.score;
+                if (colidedEntity == player)
+                {
+                    Thread.Sleep(10);
+                    new Beep().BeepBeep(40, 75, 500);
+                    gameOver();
+                }
+                else if (colidedEntity == ufo)
+                {
+
+                    ufo.removeFromScreen(currentScreen);
+                    ufo = null;
+                }
+                else
+                {
+                    enemies.Remove(colidedEntity);
+                    colidedEntity.removeFromScreen(currentScreen);
+                }
+            }
         }
         static LivingEntity findEntityWithHitboxAt(int posX, int posY)
         {
@@ -395,204 +401,6 @@ namespace ConsoleSpaceInvaders
                 }
             }
             return null;
-        }
-
-        //Screen Stuff
-        static void gameOverScreen()
-        {
-            String gameOverScreen = "           _____                         ____                          \n          / ____|                       / __ \\                         \n         | |  __  __ _ _ __ ___   ___  | |  | |_   _____ _ __          \n         | | |_ |/ _` | '_ ` _ \\ / _ \\ | |  | \\ \\ / / _ \\ '__|         \n         | |__| | (_| | | | | | |  __/ | |__| |\\ V /  __/ |            \n          \\_____|\\__,_|_| |_| |_|\\___|  \\____/  \\_/ \\___|_|            \n                                                                       \n                                                                       \n┌─┐┬─┐┌─┐┌─┐┌─┐  ┌─┐┌┐┌┬ ┬  ┬┌─┌─┐┬ ┬  ┌┬┐┌─┐  ┌─┐┌─┐┌┐┌┌┬┐┬ ┌┐┌ ┬ ┬┌─┐\n├─┘├┬┘├┤ └─┐└─┐  ├─┤│││└┬┘  ├┴┐├┤ └┬┘   │ │ │  │  │ ││││ │ │ │││ │ │├┤ \n┴  ┴└─└─┘└─┘└─┘  ┴ ┴┘└┘ ┴   ┴ ┴└─┘ ┴    ┴ └─┘  └─┘└─┘┘└┘ ┴ ┴ ┘└┘ └─┘└─┘";
-            List<String> gameOverScreenList = new List<String>();
-            gameOverScreenList.AddRange(gameOverScreen.Split(new string[] { "\n" }, StringSplitOptions.None));
-            transitionIntoScreen(gameOverScreenList);
-        }
-        static void startScreen()
-        {
-            allWhiteScreen();
-            String startScreen = "________/\\\\\\\\\\\\\\\\\\_______/\\\\\\\\\\_______/\\\\\\\\\\_____/\\\\\\_____/\\\\\\\\\\\\\\\\\\\\\\_________/\\\\\\\\\\_______/\\\\\\______________/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_        \n _____/\\\\\\////////______/\\\\\\///\\\\\\____\\/\\\\\\\\\\\\___\\/\\\\\\___/\\\\\\/////////\\\\\\_____/\\\\\\///\\\\\\____\\/\\\\\\_____________\\/\\\\\\///////////__       \n  ___/\\\\\\/_____________/\\\\\\/__\\///\\\\\\__\\/\\\\\\/\\\\\\__\\/\\\\\\__\\//\\\\\\______\\///____/\\\\\\/__\\///\\\\\\__\\/\\\\\\_____________\\/\\\\\\_____________      \n   __/\\\\\\______________/\\\\\\______\\//\\\\\\_\\/\\\\\\//\\\\\\_\\/\\\\\\___\\////\\\\\\__________/\\\\\\______\\//\\\\\\_\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\\\_____     \n    _\\/\\\\\\_____________\\/\\\\\\_______\\/\\\\\\_\\/\\\\\\\\//\\\\\\\\/\\\\\\______\\////\\\\\\______\\/\\\\\\_______\\/\\\\\\_\\/\\\\\\_____________\\/\\\\\\///////______    \n     _\\//\\\\\\____________\\//\\\\\\______/\\\\\\__\\/\\\\\\_\\//\\\\\\/\\\\\\_________\\////\\\\\\___\\//\\\\\\______/\\\\\\__\\/\\\\\\_____________\\/\\\\\\_____________   \n      __\\///\\\\\\___________\\///\\\\\\__/\\\\\\____\\/\\\\\\__\\//\\\\\\\\\\\\__/\\\\\\______\\//\\\\\\___\\///\\\\\\__/\\\\\\____\\/\\\\\\_____________\\/\\\\\\_____________  \n       ____\\////\\\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\/\\\\\\___\\//\\\\\\\\\\_\\///\\\\\\\\\\\\\\\\\\\\\\/______\\///\\\\\\\\\\/_____\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_ \n        _______\\/////////_______\\/////_______\\///_____\\/////____\\///////////__________\\/////_______\\///////////////__\\///////////////__\n                                                                                                                                       \n                                                                                                                                       \n          _______  _______  _______  _______  _______      _________ _                 _______  ______   _______  _______  _______     \n         (  ____ \\(  ____ )(  ___  )(  ____ \\(  ____ \\     \\__   __/( (    /||\\     /|(  ___  )(  __  \\ (  ____ \\(  ____ )(  ____ \\    \n         | (    \\/| (    )|| (   ) || (    \\/| (    \\/        ) (   |  \\  ( || )   ( || (   ) || (  \\  )| (    \\/| (    )|| (    \\/    \n         | (_____ | (____)|| (___) || |      | (__            | |   |   \\ | || |   | || (___) || |   ) || (__    | (____)|| (_____     \n         (_____  )|  _____)|  ___  || |      |  __)           | |   | (\\ \\) |( (   ) )|  ___  || |   | ||  __)   |     __)(_____  )    \n               ) || (      | (   ) || |      | (              | |   | | \\   | \\ \\_/ / | (   ) || |   ) || (      | (\\ (         ) |    \n         /\\____) || )      | )   ( || (____/\\| (____/\\     ___) (___| )  \\  |  \\   /  | )   ( || (__/  )| (____/\\| ) \\ \\__/\\____) |    \n         \\_______)|/       |/     \\|(_______/(_______/     \\_______/|/    )_)   \\_/   |/     \\|(______/ (_______/|/   \\__/\\_______)    \n                                                                                                                                       \n                                                                                                                                       \n                                                                                                                                       \n                                                                                                                                       \n                                                                                                                                       \n┌─┐┬─┐┌─┐┌─┐┌─┐  ┌─┐┌┐┌┬ ┬  ┬┌─┌─┐┬ ┬  ┌┬┐┌─┐  ┌─┐┌┬┐┌─┐┬─┐┌┬┐                                                                         \n├─┘├┬┘├┤ └─┐└─┐  ├─┤│││└┬┘  ├┴┐├┤ └┬┘   │ │ │  └─┐ │ ├─┤├┬┘ │                                                                          \n┴  ┴└─└─┘└─┘└─┘  ┴ ┴┘└┘ ┴   ┴ ┴└─┘ ┴    ┴ └─┘  └─┘ ┴ ┴ ┴┴└─ ┴                                                                          ";
-            List<String> startScreenList = new List<String>();
-            startScreenList.AddRange(startScreen.Split(new string[] { "\n" }, StringSplitOptions.None));
-            transitionIntoScreen(startScreenList);
-        }
-        static void transitionIntoScreen(List<String> screen)
-        {
-            int middleX = width / 2;
-            int middleY = height / 2;
-            char[,] fullScreen = new char[width - 2, height - 2];
-            for (int y = 0; y < height - 2; y++)
-            {
-                for (int x = 0; x < width - 2; x++)
-                {
-                    fullScreen[x, y] = ' ';
-                }
-            }
-            int startTextX = middleX - screen[0].Length / 2;
-            int startTextY = middleY - screen.Count / 2;
-            int moveY = 0;
-            foreach (String line in screen)
-            {
-                int moveX = 0;
-                foreach (Char c in line)
-                {
-                    fullScreen[startTextX + moveX, startTextY + moveY] = c;
-                    moveX++;
-                }
-                moveY++;
-            }
-            bool written = false;
-            bool writtenForced = false;
-            int maxDist = 0;
-            void stopTransition()
-            {
-                if (!written)
-                {
-                    Char key = Console.ReadKey().KeyChar;
-                    writtenForced = true;
-                }
-            }
-            Thread thread = new Thread(new ThreadStart(stopTransition));
-            thread.Start();
-            while (!written && !writtenForced)
-            {
-                /*int fromX = middleX - maxDist;
-                int toX = middleX + maxDist;
-                int fromY = middleY - maxDist;
-                int toY = middleY + maxDist;
-                if (fromX < 0) fromX = 0;
-                if (fromY < 0) fromY = 0;
-                if (toX > width-2) toX = width - 2;
-                if (toY > height-2) toY = height-2;*/
-                int fromY = 0;
-                int fromX = 0;
-                int toY = fullScreen.GetLength(1);
-                int toX = fullScreen.GetLength(0);
-
-                for (int y = fromY; y < toY; y++)
-                {
-                    for (int x = fromX; x < toX; x++)
-                    {
-                        double dist = Math.Sqrt(Math.Pow(middleX - x, 2) + Math.Pow(middleY - y, 2) * 4);
-                        if (Math.Abs(dist - maxDist) <= 0.5)
-                        {
-                            if (x == toX && y == toY)
-                            {
-                                written = true;
-                            }
-                            Console.SetCursorPosition(x + 1, y + 2);
-                            Console.Write(fullScreen[x, y]);
-                        }
-                    }
-                }
-                maxDist++;
-                Thread.Sleep(1);
-            }
-            if (!written && writtenForced)
-            {
-                List<String> fullScreenStr = new List<String>();
-                for (int y = 0; y < fullScreen.GetLength(1); y++)
-                {
-                    String line = "";
-                    for (int x = 0; x < fullScreen.GetLength(0); x++)
-                    {
-                        line += fullScreen[x, y];
-                    }
-                    Console.SetCursorPosition(1, y + 2);
-                    Console.Write(line);
-                }
-            }
-        }
-        static void prepareGameBorder()
-        {
-            Console.Clear();
-            Console.WriteLine("aaaaaa");
-            StringBuilder top = new StringBuilder(new string('▄', width));
-            StringBuilder middle = new StringBuilder("█" + new string(' ', width - 2) + "█");
-            StringBuilder bottom = new StringBuilder(new string('▀', width));
-
-            Console.ForegroundColor = ConsoleColor.DarkBlue;
-            Console.WriteLine(top);
-            for (int x = 1; x < height - 1; x++) Console.WriteLine(middle);
-            Console.WriteLine(bottom);
-            Console.ForegroundColor = ConsoleColor.White;
-
-        }
-        static void allWhiteScreen()
-        {
-            Console.Clear();
-            Console.WriteLine("aaaaaa");
-            StringBuilder middle = new StringBuilder(new string('█', width));
-            for (int x = 0; x < height; x++) Console.WriteLine(middle);
-
-        }
-        static void clearEntireScreen()
-        {
-            currentScreen.Clear();
-            for (int i = 0; i < height-2; i++) currentScreen.Add(new StringBuilder(new string(' ', width - 2)));
-            //currentScreen[0] = new StringBuilder("X" + new string(' ', width -4)+"X");
-            //currentScreen[height-3] = new StringBuilder("X" + new string(' ', width -4) + "X");
-        }
-        static void reWriteLivesAndScore()
-        {
-            if (!redrawing)
-            {
-                redrawingTwo = true;
-                Console.SetCursorPosition(1, height);
-                Console.Write($" Lives: {player.health} ");
-                Console.SetCursorPosition(width - 13, height);
-                Console.Write($" Score: {score}    ");
-                redrawingTwo = false;
-            }
-        }
-        static void reDrawScreen()
-        {
-            redrawing = true;
-
-            int lineNum = -1;
-            foreach (StringBuilder line in currentScreen)
-            {
-                lineNum++;
-                if (lastScreen.Count == currentScreen.Count)
-                {
-                    if (line == lastScreen[lineNum]) continue;
-                }
-
-                Console.SetCursorPosition(1, lineNum+2);
-                Console.Write(line);
-            }
-            lastScreen.Clear();
-            //lastScreen.AddRange(currentScreen);
-            currentScreen.ForEach(delegate (StringBuilder str) {
-                lastScreen.Add(new StringBuilder(str.ToString()));
-            });
-            redrawing = false;
-        }
-        static void reDrawPlayer()
-        {
-            int posX = player.posX-2;
-            int posY = player.posY;
-            int playerWidth = player.getSizeX()+4;
-            int playerHeight = player.getSizeY();
-
-            if (posX < 0)
-            {
-                playerWidth += posX;
-                posX = 0;
-            }
-            if (posX+playerWidth > width-2) 
-            {
-                playerWidth = width - posX-2;
-            }
-
-            //Console.ForegroundColor = ConsoleColor.DarkGreen;
-            for (int y = posY; y < (posY+playerHeight-1);y++)
-            {
-                string line = currentScreen[y].ToString();
-                if (!redrawing && !redrawingTwo)
-                {
-                    Console.SetCursorPosition(posX+1, y+2);
-                    Console.Write(line.Substring(posX, playerWidth));
-                }
-            }
-            //Console.ResetColor();
         }
 
     }

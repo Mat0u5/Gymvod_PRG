@@ -11,6 +11,7 @@ namespace ConsoleSpaceInvaders
 {
 
     //NOTE: This is not a class I created, I copied it from https://social.msdn.microsoft.com/forums/vstudio/en-US/18fe83f0-5658-4bcf-bafc-2e02e187eb80/beep-beep
+    //It's purely for creating sounds
     internal class Beep
     {
 
@@ -22,7 +23,7 @@ namespace ConsoleSpaceInvaders
             this.Amplitude = Amplitude;
             this.Frequency = Frequency;
             this.Duration = Duration;
-            Thread thread = new Thread(new ThreadStart(beeep));
+            Thread thread = new Thread(new ThreadStart(beeep));//so that the beed doesnt stop the main thread
             thread.Start();
         }
         private void beeep()
