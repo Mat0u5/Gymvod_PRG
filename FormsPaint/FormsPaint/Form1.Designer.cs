@@ -44,7 +44,8 @@
             this.clearCanvasBox = new System.Windows.Forms.PictureBox();
             this.undoBox = new System.Windows.Forms.PictureBox();
             this.currentColorBox = new System.Windows.Forms.PictureBox();
-            this.paintBrushBox_brush = new System.Windows.Forms.PictureBox();
+            this.caligraphyPenBox_caligraphyPen = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.thicknessSlider)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.floodBox_flood)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.loadImageBox)).BeginInit();
@@ -57,7 +58,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.clearCanvasBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.undoBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.currentColorBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.paintBrushBox_brush)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.caligraphyPenBox_caligraphyPen)).BeginInit();
             this.SuspendLayout();
             // 
             // paintPanel
@@ -65,7 +66,7 @@
             this.paintPanel.BackColor = System.Drawing.Color.White;
             this.paintPanel.Location = new System.Drawing.Point(40, 34);
             this.paintPanel.Name = "paintPanel";
-            this.paintPanel.Size = new System.Drawing.Size(699, 544);
+            this.paintPanel.Size = new System.Drawing.Size(787, 544);
             this.paintPanel.TabIndex = 1;
             this.paintPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelMouseDrawEvent);
             this.paintPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelMouseDrawEvent);
@@ -74,7 +75,7 @@
             // thicknessSlider
             // 
             this.thicknessSlider.Cursor = System.Windows.Forms.Cursors.No;
-            this.thicknessSlider.Location = new System.Drawing.Point(793, 310);
+            this.thicknessSlider.Location = new System.Drawing.Point(891, 286);
             this.thicknessSlider.Maximum = 50;
             this.thicknessSlider.Minimum = 1;
             this.thicknessSlider.Name = "thicknessSlider";
@@ -86,7 +87,7 @@
             // thicknessLabel
             // 
             this.thicknessLabel.AutoSize = true;
-            this.thicknessLabel.Location = new System.Drawing.Point(790, 286);
+            this.thicknessLabel.Location = new System.Drawing.Point(888, 262);
             this.thicknessLabel.Name = "thicknessLabel";
             this.thicknessLabel.Size = new System.Drawing.Size(56, 13);
             this.thicknessLabel.TabIndex = 4;
@@ -94,7 +95,7 @@
             // 
             // thicknessTextBox
             // 
-            this.thicknessTextBox.Location = new System.Drawing.Point(885, 284);
+            this.thicknessTextBox.Location = new System.Drawing.Point(983, 260);
             this.thicknessTextBox.Name = "thicknessTextBox";
             this.thicknessTextBox.Size = new System.Drawing.Size(68, 20);
             this.thicknessTextBox.TabIndex = 5;
@@ -103,7 +104,7 @@
             // floodBox_flood
             // 
             this.floodBox_flood.Image = global::FormsPaint.Properties.Resources.bucket;
-            this.floodBox_flood.Location = new System.Drawing.Point(885, 108);
+            this.floodBox_flood.Location = new System.Drawing.Point(983, 112);
             this.floodBox_flood.Name = "floodBox_flood";
             this.floodBox_flood.Size = new System.Drawing.Size(45, 44);
             this.floodBox_flood.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -114,7 +115,7 @@
             // loadImageBox
             // 
             this.loadImageBox.Image = global::FormsPaint.Properties.Resources.loadImage;
-            this.loadImageBox.Location = new System.Drawing.Point(943, 48);
+            this.loadImageBox.Location = new System.Drawing.Point(1046, 44);
             this.loadImageBox.Name = "loadImageBox";
             this.loadImageBox.Size = new System.Drawing.Size(45, 44);
             this.loadImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -125,7 +126,7 @@
             // eraserBox_eraser
             // 
             this.eraserBox_eraser.Image = global::FormsPaint.Properties.Resources.eraser;
-            this.eraserBox_eraser.Location = new System.Drawing.Point(943, 108);
+            this.eraserBox_eraser.Location = new System.Drawing.Point(1046, 112);
             this.eraserBox_eraser.Name = "eraserBox_eraser";
             this.eraserBox_eraser.Size = new System.Drawing.Size(45, 44);
             this.eraserBox_eraser.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -136,7 +137,7 @@
             // lineBox_line
             // 
             this.lineBox_line.Image = global::FormsPaint.Properties.Resources.line;
-            this.lineBox_line.Location = new System.Drawing.Point(921, 204);
+            this.lineBox_line.Location = new System.Drawing.Point(1019, 180);
             this.lineBox_line.Name = "lineBox_line";
             this.lineBox_line.Size = new System.Drawing.Size(45, 44);
             this.lineBox_line.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -147,7 +148,7 @@
             // rectangleBox_rectangle
             // 
             this.rectangleBox_rectangle.Image = global::FormsPaint.Properties.Resources.rectangle;
-            this.rectangleBox_rectangle.Location = new System.Drawing.Point(854, 204);
+            this.rectangleBox_rectangle.Location = new System.Drawing.Point(952, 180);
             this.rectangleBox_rectangle.Name = "rectangleBox_rectangle";
             this.rectangleBox_rectangle.Size = new System.Drawing.Size(45, 44);
             this.rectangleBox_rectangle.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -158,7 +159,7 @@
             // ellipseBox_ellipse
             // 
             this.ellipseBox_ellipse.Image = global::FormsPaint.Properties.Resources.circle;
-            this.ellipseBox_ellipse.Location = new System.Drawing.Point(784, 204);
+            this.ellipseBox_ellipse.Location = new System.Drawing.Point(882, 180);
             this.ellipseBox_ellipse.Name = "ellipseBox_ellipse";
             this.ellipseBox_ellipse.Size = new System.Drawing.Size(45, 44);
             this.ellipseBox_ellipse.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -169,7 +170,7 @@
             // penBox_pen
             // 
             this.penBox_pen.Image = global::FormsPaint.Properties.Resources.pen;
-            this.penBox_pen.Location = new System.Drawing.Point(756, 108);
+            this.penBox_pen.Location = new System.Drawing.Point(854, 112);
             this.penBox_pen.Name = "penBox_pen";
             this.penBox_pen.Size = new System.Drawing.Size(45, 44);
             this.penBox_pen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -180,7 +181,7 @@
             // saveFileBox
             // 
             this.saveFileBox.Image = global::FormsPaint.Properties.Resources.save;
-            this.saveFileBox.Location = new System.Drawing.Point(885, 48);
+            this.saveFileBox.Location = new System.Drawing.Point(983, 44);
             this.saveFileBox.Name = "saveFileBox";
             this.saveFileBox.Size = new System.Drawing.Size(45, 44);
             this.saveFileBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -191,7 +192,7 @@
             // clearCanvasBox
             // 
             this.clearCanvasBox.Image = global::FormsPaint.Properties.Resources.delete;
-            this.clearCanvasBox.Location = new System.Drawing.Point(819, 48);
+            this.clearCanvasBox.Location = new System.Drawing.Point(920, 44);
             this.clearCanvasBox.Name = "clearCanvasBox";
             this.clearCanvasBox.Size = new System.Drawing.Size(45, 44);
             this.clearCanvasBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -202,7 +203,7 @@
             // undoBox
             // 
             this.undoBox.Image = global::FormsPaint.Properties.Resources.undo;
-            this.undoBox.Location = new System.Drawing.Point(756, 48);
+            this.undoBox.Location = new System.Drawing.Point(854, 44);
             this.undoBox.Name = "undoBox";
             this.undoBox.Size = new System.Drawing.Size(45, 44);
             this.undoBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -213,7 +214,7 @@
             // currentColorBox
             // 
             this.currentColorBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(255)))));
-            this.currentColorBox.Location = new System.Drawing.Point(810, 406);
+            this.currentColorBox.Location = new System.Drawing.Point(1000, 356);
             this.currentColorBox.Name = "currentColorBox";
             this.currentColorBox.Size = new System.Drawing.Size(64, 60);
             this.currentColorBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -221,16 +222,24 @@
             this.currentColorBox.TabStop = false;
             this.currentColorBox.Click += new System.EventHandler(this.pictureBoxClickEvent);
             // 
-            // paintBrushBox_brush
+            // caligraphyPenBox_caligraphyPen
             // 
-            this.paintBrushBox_brush.Image = global::FormsPaint.Properties.Resources.icons8_paint_100;
-            this.paintBrushBox_brush.Location = new System.Drawing.Point(819, 108);
-            this.paintBrushBox_brush.Name = "paintBrushBox_brush";
-            this.paintBrushBox_brush.Size = new System.Drawing.Size(45, 44);
-            this.paintBrushBox_brush.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.paintBrushBox_brush.TabIndex = 0;
-            this.paintBrushBox_brush.TabStop = false;
-            this.paintBrushBox_brush.Click += new System.EventHandler(this.pictureBoxClickEvent);
+            this.caligraphyPenBox_caligraphyPen.Image = global::FormsPaint.Properties.Resources.caligraphyPen;
+            this.caligraphyPenBox_caligraphyPen.Location = new System.Drawing.Point(920, 112);
+            this.caligraphyPenBox_caligraphyPen.Name = "caligraphyPenBox_caligraphyPen";
+            this.caligraphyPenBox_caligraphyPen.Size = new System.Drawing.Size(45, 44);
+            this.caligraphyPenBox_caligraphyPen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.caligraphyPenBox_caligraphyPen.TabIndex = 0;
+            this.caligraphyPenBox_caligraphyPen.TabStop = false;
+            this.caligraphyPenBox_caligraphyPen.Click += new System.EventHandler(this.pictureBoxClickEvent);
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(908, 369);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(86, 31);
+            this.label1.TabIndex = 18;
+            this.label1.Text = "Current Color    Click to change";
             // 
             // Form1
             // 
@@ -238,6 +247,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.ClientSize = new System.Drawing.Size(1103, 680);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.floodBox_flood);
             this.Controls.Add(this.loadImageBox);
             this.Controls.Add(this.eraserBox_eraser);
@@ -253,7 +263,7 @@
             this.Controls.Add(this.thicknessLabel);
             this.Controls.Add(this.thicknessSlider);
             this.Controls.Add(this.paintPanel);
-            this.Controls.Add(this.paintBrushBox_brush);
+            this.Controls.Add(this.caligraphyPenBox_caligraphyPen);
             this.Name = "Form1";
             this.Text = " ";
             this.Load += new System.EventHandler(this.onLoad);
@@ -269,7 +279,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.clearCanvasBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.undoBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.currentColorBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.paintBrushBox_brush)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.caligraphyPenBox_caligraphyPen)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -277,7 +287,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox paintBrushBox_brush;
+        private System.Windows.Forms.PictureBox caligraphyPenBox_caligraphyPen;
         private System.Windows.Forms.Panel paintPanel;
         private System.Windows.Forms.TrackBar thicknessSlider;
         private System.Windows.Forms.Label thicknessLabel;
@@ -294,6 +304,7 @@
         private System.Windows.Forms.PictureBox eraserBox_eraser;
         private System.Windows.Forms.PictureBox loadImageBox;
         private System.Windows.Forms.PictureBox floodBox_flood;
+        private System.Windows.Forms.Label label1;
     }
 }
 
