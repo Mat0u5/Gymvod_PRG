@@ -83,5 +83,30 @@
   <ItemGroup>
     <None Include="Resources\icons8-paint-100.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\brush.png" />
+    <None Include="Resources\undo1.png" />
+    <None Include="Resources\save1.png" />
+    <None Include="Resources\rectangle1.png" />
+    <None Include="Resources\pen1.png" />
+    <None Include="Resources\loadImage1.png" />
+    <None Include="Resources\line1.png" />
+    <None Include="Resources\eraser1.png" />
+    <None Include="Resources\ellipse1.png" />
+    <None Include="Resources\delete1.png" />
+    <None Include="Resources\circle1.png" />
+    <None Include="Resources\bucket1.png" />
+    <None Include="Resources\brush1.png" />
+    <Content Include="Resources\circle.png" />
+    <Content Include="Resources\delete.png" />
+    <Content Include="Resources\ellipse.png" />
+    <Content Include="Resources\eraser.png" />
+    <Content Include="Resources\line.png" />
+    <Content Include="Resources\loadImage.png" />
+    <Content Include="Resources\pen.png" />
+    <Content Include="Resources\rectangle.png" />
+    <Content Include="Resources\save.png" />
+    <Content Include="Resources\undo.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
