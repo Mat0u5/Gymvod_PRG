@@ -190,7 +190,7 @@ namespace MatrixManupulation
                     }
                     matrixName = args[1];
                     matrix = matrices[matrixName];
-                    oldMatrix = (int[,])matrix.Clone(); matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
+                    oldMatrix = (int[,])matrix.Clone();//cloning the matrix now so that i can display the changes with printMatrixWithChanges()
                     matrix = (args[0].ToLower() == "swaprows") ? swapRows(matrix, swap, swapWith) : swapColumns(matrix, swap, swapWith);
                     printMatrixWithChanges(matrix, oldMatrix, matrixName);
                     matrices[matrixName] = matrix;
