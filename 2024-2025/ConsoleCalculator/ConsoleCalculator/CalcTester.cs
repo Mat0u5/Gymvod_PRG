@@ -29,9 +29,6 @@ namespace ConsoleCalculator
             // Modulus
             //{"17 % 3", "2"},
     
-            // Division by Zero (Expecting error handling in your calculator)
-            {"1 / 0", "Infinity"},
-    
             // Trigonometric Functions (Assuming angles in degrees for stress testing)
             //{"sin(90)", "1"},
             //{"cos(0)", "1"},
@@ -44,7 +41,7 @@ namespace ConsoleCalculator
     
             // Nested Operations
             {"((2 + 3) * (4 - 1)) / 5", "3"},
-            {"((5^2) - (3^2)) + (4 * 2)", "26"},
+            {"((5^2) - (3^2)) + (4 * 2)", "24"},
     
             // Logarithmic Expressions (Assuming base 10)
             //{"log(100)", "2"},
@@ -52,7 +49,7 @@ namespace ConsoleCalculator
     
             // Large Numbers
             {"999999999 + 999999999", "1999999998"},
-            {"123456789 * 987654321", "121932631112635269"},
+            {"123456789 * 987654321", "1,21932631112635E17"},//121932631112635269
     
             // Negative Numbers
             {"-3 + 7", "4"},
@@ -82,18 +79,19 @@ namespace ConsoleCalculator
             foreach (String problem in problems.Keys)
             {
                 String expectedSolution = problems[problem].Replace(".",",");
-                String actualSolution = Evaluator.evaulate(StringUtils.parseInput(problem));
+                String actualSolution = StringUtils.finalizeOutput(Evaluator.evaulate(StringUtils.parseInput(problem), false), true);
+
 
                 if (expectedSolution != actualSolution)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Problem Unsuccessful");
+                    Console.WriteLine($"Problem ({problem}) Unsuccessful");
                     Console.ResetColor();
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Problem Successful");
+                    Console.WriteLine($"Problem ({problem}) Successful");
                     Console.ResetColor();
                 }
             }

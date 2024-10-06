@@ -9,11 +9,23 @@ namespace ConsoleCalculator
 {
     internal class Evaluator
     {
-        public static String evaluateBrackets(String input)
-        {   
+        public static String evaluateBrackets(String input, bool sendOutput)
+        {
+            if (!input.Contains("(")) return input;
+            while (input.Contains("("))
+            {
+                input = StringUtils.unifyBrackets(StringUtils.impliedMultiplication(input));
+                int[] pos = StringUtils.getInnerMostBracketIndeces(input);
+                if (pos[0] <= -1 || pos[1] <= -1) return input;
+                String beforeBracket = input.Substring(0, pos[0]);
+                String evaledBracket = evaulate(input.Substring(pos[0] + 1, pos[1] - 2), false);
+                String afterBracket = input.Substring(Math.Min(pos[0] + pos[1], input.Length));
+                input = beforeBracket + evaledBracket + afterBracket;
+                if (sendOutput) Console.WriteLine("==> " + StringUtils.finalizeOutput(input, true));
+            }
             return input;
         }
-        public static String evaluateSign(String input, String sign, int startIndex)
+        public static String evaluateSign(String input, String sign, bool sendOutput)
         {
             if (!input.Contains(sign) && !sign.Equals("*/")) return input;
             int index = input.IndexOf(sign);
@@ -53,8 +65,8 @@ namespace ConsoleCalculator
             }
 
             input = leftSide.Substring(0, leftSide.Length- leftNumStrBracketed.Length) + strResult + rightSide.Substring(rightNumStrBracketed.Length);
-            Console.WriteLine("=> " + StringUtils.finalizeOutput(input, true));
-            return input.Contains(sign) ? evaluateSign(input, sign, 0): input;
+            if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input, true));
+            return input.Contains(sign) ? evaluateSign(input, sign, sendOutput) : input;
 
             String throwError(String error)
             {
@@ -62,17 +74,16 @@ namespace ConsoleCalculator
                 Console.WriteLine(error);
                 Console.ResetColor();
                 input = leftSide += rightSide;
-                return input.Contains(sign) ? evaluateSign(input, sign, 0) : input;
+                return input.Contains(sign) ? evaluateSign(input, sign, sendOutput) : input;
             }
         }
-        public static String evaulate(String input)
+        public static String evaulate(String input, bool sendOutput)
         {
-
-            input = evaluateBrackets(input);
+            input = evaluateBrackets(input, sendOutput);
             String[] signListInOrder = new String[] { "^", "×", "*/", "+", "-" };
             while (StringUtils.containsAnySign(input, signListInOrder))
             {
-                foreach (String sign in signListInOrder) input = evaluateSign(input, sign, 0);
+                foreach (String sign in signListInOrder) input = evaluateSign(input, sign, sendOutput);
             }
             return input;
         }

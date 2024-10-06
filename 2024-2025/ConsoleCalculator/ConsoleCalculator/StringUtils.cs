@@ -21,6 +21,16 @@ namespace ConsoleCalculator
                 {"÷","/"},
                 {"×","*"}
             };
+        public static int[] getInnerMostBracketIndeces(String input)
+        {
+            int lastOpenBracketIndex = -1;
+            for (int currentIndex = 0; currentIndex < input.Length; currentIndex++)
+            {
+                if (input[currentIndex] == '(') lastOpenBracketIndex = currentIndex;
+                if (input[currentIndex] == ')') return new int[] { lastOpenBracketIndex, currentIndex - lastOpenBracketIndex+1 };
+            }
+            return new int[] { -1,-1 };
+        }
         public static String parseInput(string input)
         {
             while (true)
@@ -104,7 +114,7 @@ namespace ConsoleCalculator
             input = unifyBrackets(input);
             if (input.StartsWith("(") && input.EndsWith(")"))
             {
-                input = input.Substring(1).Substring(input.Length-1);
+                input = input.Substring(1).Substring(0,input.Length-2);
             }
             return input;
         }
@@ -134,7 +144,7 @@ namespace ConsoleCalculator
         }
         public static String finalizeOutput(String input, bool showIrrationals)
         {
-            return input;
+            return input.Replace("−", "-");
         }
     }
 }
