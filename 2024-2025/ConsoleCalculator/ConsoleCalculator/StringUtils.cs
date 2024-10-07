@@ -77,7 +77,7 @@ namespace ConsoleCalculator
         {
             return input.Contains("(") || input.Contains(")");
         }
-        public static String unifyBrackets(String input) //replaces all [,{,},] with ()
+        public static String unifyBrackets(String input)
         {
             return input.Replace("[", "(").Replace("{", "(").Replace("]", ")").Replace("}", ")");
         }
@@ -111,7 +111,6 @@ namespace ConsoleCalculator
         }
         public static String removeBrackets(String input)//remove brackets on the start and end of string
         {
-            input = unifyBrackets(input);
             if (input.StartsWith("(") && input.EndsWith(")"))
             {
                 input = input.Substring(1).Substring(0,input.Length-2);
@@ -130,12 +129,13 @@ namespace ConsoleCalculator
             String finalize(String sub)
             {
                 bool bracketed = false;
-                String unbracketedSub = removeBrackets(sub).Replace("−", "-");
-                if (sub.Replace("−", "-") != unbracketedSub) bracketed = true;
+                sub = unifyBrackets(sub).Replace("−", "-");
+                String unbracketedSub = removeBrackets(sub);
+                if (sub != unbracketedSub) bracketed = true;
                 if (double.TryParse(unbracketedSub, out double result))
                 {
                     if (unbracketedSub.StartsWith("-") && !bracketed && exponentiating) sub = sub.Substring(1);
-                    return sub.Replace("−", "-");
+                    return sub;
                 }
                 return "";
             }
@@ -144,7 +144,7 @@ namespace ConsoleCalculator
         }
         public static String finalizeOutput(String input, bool showIrrationals)
         {
-            return input.Replace("−", "-");
+            return removeBrackets(input).Replace("−", "-");
         }
     }
 }

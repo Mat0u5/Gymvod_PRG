@@ -20,6 +20,9 @@ namespace ConsoleCalculator
             {"5 ^ 3", "125"},
             {"16 ^ 0.5", "4"},
             {"27 ^ (1/3)", "3"},
+            {"-2 ^ 2", "-4"},
+            {"(-2) ^ 2", "4"},
+            {"2 ^ -2", "0,25"},
     
             // Complex Expressions
             {"(3 + 5) * 2", "16"},
@@ -42,6 +45,8 @@ namespace ConsoleCalculator
             // Nested Operations
             {"((2 + 3) * (4 - 1)) / 5", "3"},
             {"((5^2) - (3^2)) + (4 * 2)", "24"},
+            {"-(2 + 3)", "-5"},
+            {"-(2 - 3)", "1"},
     
             // Logarithmic Expressions (Assuming base 10)
             //{"log(100)", "2"},

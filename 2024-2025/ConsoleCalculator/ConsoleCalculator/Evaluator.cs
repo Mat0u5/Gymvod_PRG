@@ -11,17 +11,17 @@ namespace ConsoleCalculator
     {
         public static String evaluateBrackets(String input, bool sendOutput)
         {
-            if (!input.Contains("(")) return input;
             while (input.Contains("("))
             {
-                input = StringUtils.unifyBrackets(StringUtils.impliedMultiplication(input));
+                input = StringUtils.impliedMultiplication(input);
                 int[] pos = StringUtils.getInnerMostBracketIndeces(input);
                 if (pos[0] <= -1 || pos[1] <= -1) return input;
                 String beforeBracket = input.Substring(0, pos[0]);
                 String evaledBracket = evaulate(input.Substring(pos[0] + 1, pos[1] - 2), false);
                 String afterBracket = input.Substring(Math.Min(pos[0] + pos[1], input.Length));
                 input = beforeBracket + evaledBracket + afterBracket;
-                if (sendOutput) Console.WriteLine("==> " + StringUtils.finalizeOutput(input, true));
+                if (afterBracket.StartsWith("^")) return input = beforeBracket + "["+ evaledBracket+"]" + afterBracket;
+                if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input, true));
             }
             return input;
         }
@@ -39,7 +39,7 @@ namespace ConsoleCalculator
             String leftSide = input.Substring(0, index);
             String rightSide = input.Substring(index + 1);
             String leftNumStrBracketed = StringUtils.getNumberOnSideOfString(leftSide, 1, sign.Equals("^"));
-            String rightNumStrBracketed = StringUtils.getNumberOnSideOfString(rightSide, -1, sign.Equals("^"));
+            String rightNumStrBracketed = StringUtils.getNumberOnSideOfString(rightSide, -1, false);
             String leftNumStr = StringUtils.removeBrackets(leftNumStrBracketed);
             String rightNumStr = StringUtils.removeBrackets(rightNumStrBracketed);
             String strResult = "";
@@ -79,12 +79,18 @@ namespace ConsoleCalculator
         }
         public static String evaulate(String input, bool sendOutput)
         {
+            /*String lastInput = input;
+            while (true)
+            {
+                lastInput = input;
+            }*/
             input = evaluateBrackets(input, sendOutput);
             String[] signListInOrder = new String[] { "^", "×", "*/", "+", "-" };
             while (StringUtils.containsAnySign(input, signListInOrder))
             {
                 foreach (String sign in signListInOrder) input = evaluateSign(input, sign, sendOutput);
             }
+            //if (lastInput.Equals(input)) return input;
             return input;
         }
     }
