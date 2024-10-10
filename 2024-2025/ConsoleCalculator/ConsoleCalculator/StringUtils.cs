@@ -142,9 +142,19 @@ namespace ConsoleCalculator
 
             return "";
         }
-        public static String finalizeOutput(String input, bool showIrrationals)
+        public static String finalizeOutput(String input)
         {
-            return removeBrackets(input).Replace("−", "-");
+            input = removeBrackets(input).Replace("−", "-");
+            if (Double.TryParse(input, out double num))
+            {
+                double roundPrecision = Math.Pow(10, 10);
+                input = Convert.ToString(Math.Round(num* roundPrecision)/ roundPrecision);
+            }
+            return input;
+        }
+        public static String replaceVariables(String input)
+        {
+            return input;
         }
     }
 }

@@ -9,6 +9,48 @@ namespace ConsoleCalculator
 {
     internal class Evaluator
     {
+        static Dictionary<String, String> variables = new Dictionary<String, String>()
+        {
+            {"ans","0"},{"pi",Convert.ToString(Math.PI)},{"e",Convert.ToString(Math.E)},{"x","0"},{"y","0"},{"z","0"}
+        };
+        static String[] functions = new String[] { "sqrt", "abs", "log", "ln", "round", "floor", "ceiling", "divremainder",
+            "arcsin", "arccos", "arctg", "sin", "cos", "cotg", "tg" , "sec", "csc"};
+        static double evaluateFunction(String function, String inFunction)
+        {
+            bool hasMultipleArgs = inFunction.Contains(";");
+            String[] args = (hasMultipleArgs) ? inFunction.Split(';') : new String[] { inFunction };
+            //check if the first argument is a number
+            if (!double.TryParse(args[0], out double firstArg)) return double.NaN;
+            bool useRadians = false;
+            double degreeToRad = (useRadians) ? 1 : Math.PI / 180.0;
+            double radToDegree = (useRadians) ? 1 : 180 / Math.PI;
+
+            if (function == "sqrt") return Math.Sqrt(firstArg);
+            if (function == "abs") return Math.Abs(firstArg);
+            if (function == "floor") return Math.Floor(firstArg);
+            if (function == "ceiling") return Math.Ceiling(firstArg);
+            if (function == "ln") return Math.Log(firstArg);
+            if (function == "log" && !hasMultipleArgs) return Math.Log10(firstArg);
+            if (function == "sin") return Math.Sin(firstArg * degreeToRad);
+            if (function == "cos") return Math.Cos(firstArg * degreeToRad);
+            if (function == "csc") return 1 / Math.Sin(firstArg * degreeToRad);
+            if (function == "sec") return 1 / Math.Cos(firstArg * degreeToRad);
+            if (function == "tg") return Math.Tan(firstArg * degreeToRad);
+            if (function == "cotg") return 1 / Math.Tan(firstArg * degreeToRad);
+            if (function == "arcsin") return Math.Asin(firstArg) * radToDegree;
+            if (function == "arccos") return Math.Acos(firstArg) * radToDegree;
+            if (function == "arctg") return Math.Atan(firstArg) * radToDegree;
+
+            //chest if the function has multiple args, and if the second arg is a number
+            if (args.Length < 2) return double.NaN;
+            if (!double.TryParse(args[1], out double secongArg)) return double.NaN;
+
+            if (function == "log") return Math.Log(firstArg, secongArg);
+            if (function == "round" && int.TryParse(Convert.ToString(secongArg), out int parsedSecond)) return Math.Round(firstArg, parsedSecond);
+            if (function == "divremainder") return firstArg % secongArg;
+
+            return double.NaN;
+        }
         public static String evaluateBrackets(String input, bool sendOutput)
         {
             while (input.Contains("("))
@@ -19,9 +61,17 @@ namespace ConsoleCalculator
                 String beforeBracket = input.Substring(0, pos[0]);
                 String evaledBracket = evaulate(input.Substring(pos[0] + 1, pos[1] - 2), false);
                 String afterBracket = input.Substring(Math.Min(pos[0] + pos[1], input.Length));
+                foreach(String function in functions)
+                {
+                    if (beforeBracket.EndsWith(function) && !evaledBracket.Contains("("))
+                    {
+                        beforeBracket = beforeBracket.Substring(0, beforeBracket.Length - function.Length);
+                        evaledBracket = Convert.ToString(evaluateFunction(function, evaledBracket.Replace("−", "-")));
+                    }
+                }
                 input = beforeBracket + evaledBracket + afterBracket;
                 if (afterBracket.StartsWith("^")) return input = beforeBracket + "["+ evaledBracket+"]" + afterBracket;
-                if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input, true));
+                if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input));
             }
             return input;
         }
@@ -45,7 +95,7 @@ namespace ConsoleCalculator
             String strResult = "";
             bool leftValid = Double.TryParse(leftNumStr, out double leftNum);
             bool rightValid = Double.TryParse(rightNumStr, out double rightNum);
-            if (!leftValid || !rightValid)
+            if (!leftValid || (!rightValid && !sign.Equals("!")))
             {
                 if (!leftValid && rightValid && sign.Equals("+")) strResult = rightNumStr;
                 else if (!leftValid && rightValid && sign.Equals("-")) strResult = "−" + rightNumStr;
@@ -54,6 +104,8 @@ namespace ConsoleCalculator
             else
             {
                 double result = double.NaN;
+                if (sign.Equals("!")) result = Enumerable.Range(1, (int )Math.Round(leftNum)).Aggregate(1, (p, item) => p * item); //From Stack Overflow
+                if (sign.Equals("%")) result = leftNum % rightNum;
                 if (sign.Equals("+")) result = leftNum + rightNum;
                 if (sign.Equals("-")) result = leftNum - rightNum;
                 if (sign.Equals("/")) result = leftNum / rightNum;
@@ -65,7 +117,7 @@ namespace ConsoleCalculator
             }
 
             input = leftSide.Substring(0, leftSide.Length- leftNumStrBracketed.Length) + strResult + rightSide.Substring(rightNumStrBracketed.Length);
-            if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input, true));
+            if (sendOutput) Console.WriteLine("=> " + StringUtils.finalizeOutput(input));
             return input.Contains(sign) ? evaluateSign(input, sign, sendOutput) : input;
 
             String throwError(String error)
@@ -79,18 +131,12 @@ namespace ConsoleCalculator
         }
         public static String evaulate(String input, bool sendOutput)
         {
-            /*String lastInput = input;
-            while (true)
-            {
-                lastInput = input;
-            }*/
             input = evaluateBrackets(input, sendOutput);
-            String[] signListInOrder = new String[] { "^", "×", "*/", "+", "-" };
+            String[] signListInOrder = new String[] { "!", "^", "×", "*/", "%", "+", "-" };
             while (StringUtils.containsAnySign(input, signListInOrder))
             {
                 foreach (String sign in signListInOrder) input = evaluateSign(input, sign, sendOutput);
             }
-            //if (lastInput.Equals(input)) return input;
             return input;
         }
     }

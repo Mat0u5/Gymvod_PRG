@@ -16,7 +16,7 @@ namespace ConsoleCalculator
             while (true)
             {
                 String parsedInput = StringUtils.parseInput(Console.ReadLine());
-                Console.WriteLine(StringUtils.finalizeOutput(Evaluator.evaulate(parsedInput, true), true));
+                Console.WriteLine(StringUtils.finalizeOutput(Evaluator.evaulate(parsedInput, true)));
             }
         }
     }
