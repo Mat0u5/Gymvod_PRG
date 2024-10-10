@@ -16,46 +16,6 @@ namespace ConsoleCalculator
             {"6 * 7", "42"},
             {"20 / 5", "4"},
     
-            // Powers and Roots
-            {"5 ^ 3", "125"},
-            {"16 ^ 0.5", "4"},
-            {"27 ^ (1/3)", "3"},
-            {"-2 ^ 2", "-4"},
-            {"(-2) ^ 2", "4"},
-            {"2 ^ -2", "0,25"},
-    
-            // Complex Expressions
-            {"(3 + 5) * 2", "16"},
-            {"(4 - 1) ^ 3", "27"},
-            {"(6 * 3) / 2 + 4", "13"},
-    
-            // Modulus
-            {"17 % 3", "2"},
-    
-            // Trigonometric Functions (Assuming angles in degrees for stress testing)
-            {"sin(90)", "1"},
-            {"cos(0)", "1"},
-            {"tg(45)", "1"},
-            {"sin(30)", "0.5"},
-    
-            // Factorials
-            {"5!", "120"},
-            {"7!", "5040"},
-    
-            // Nested Operations
-            {"((2 + 3) * (4 - 1)) / 5", "3"},
-            {"((5^2) - (3^2)) + (4 * 2)", "24"},
-            {"-(2 + 3)", "-5"},
-            {"-(2 - 3)", "1"},
-    
-            // Logarithmic Expressions (Assuming base 10)
-            {"log(100)", "2"},
-            {"log(1000)", "3"},
-    
-            // Large Numbers
-            {"999999999 + 999999999", "1999999998"},
-            {"123456789 * 987654321", "1,21932631112635E+17"},//121932631112635269
-    
             // Negative Numbers
             {"-3 + 7", "4"},
             {"-10 * -5", "50"},
@@ -69,29 +29,68 @@ namespace ConsoleCalculator
             // Mixed Operations with Decimals
             {"(2.5 + 3.1) * 1.4", "7.84"},
             {"(9.2 / 2) + 1.3", "5.9"},
+            
+
+            // Powers and Roots
+            {"5 ^ 3", "125"},
+            {"16 ^ 0.5", "4"},
+            {"27 ^ (1/3)", "3"},
+            {"-2 ^ 2", "-4"},
+            {"(-2) ^ 2", "4"},
+            {"2 ^ -2", "0,25"},
+            {"2 ^ 10", "1024"},
+            {"9 ^ 5", "59049"},
+    
+            // Complex Expressions
+            {"(3 + 5) * 2", "16"},
+            {"(4 - 1) ^ 3", "27"},
+            {"(6 * 3) / 2 + 4", "13"},
+    
+            // Nested Operations
+            {"((2 + 3) * (4 - 1)) / 5", "3"},
+            {"((5^2) - (3^2)) + (4 * 2)", "24"},
+            {"-(2 + 3)", "-5"},
+            {"-(2 - 3)", "1"},
+            // Modulus
+            {"17 % 3", "2"},
+    
+            // Trigonometric Functions (Assuming angles in degrees for stress testing)
+            {"sin(90)", "1"},
+            {"cos(0)", "1"},
+            {"tg(45)", "1"},
+            {"sin(30)", "0.5"},
+    
+            // Factorials
+            {"5!", "120"},
+            {"7!", "5040"},
+    
+    
+            // Logarithmic Expressions (Assuming base 10)
+            {"log(100)", "2"},
+            {"log(1000)", "3"},
+    
+            // Large Numbers
+            {"999999999 + 999999999", "1999999998"},
+            {"123456789 * 987654321", "1,21932631112635E+17"},//121932631112635269
+    
     
             // Square Root (non-exact)
             {"sqrt(2)",  "1,4142135624"},
             {"sqrt(50)", "7,0710678119"},
     
-            // Exponentials (Stress Test for Larger Exponents)
-            {"2 ^ 10", "1024"},
-            {"9 ^ 5", "59049"},
 
             // Other Functions
             {"abs(2)*abs(-3)", "6"},
             {"sqrt(2)^-2", "0,5"},
             {"floor(tg(70))", "2"},
-            {"ceiling(-arcsin(0,4))", "-23"}
-            //,
-            //{"", ""},
-            //{"", ""},
-            //{"", ""},
-            //{"", ""}
+            {"-ln(e^2)", "-2"},
+            {"ceiling(-arcsin(0,4))", "-23"},
+            {"sin(-arctg(3) ^ 2) * sqrt(ceiling(abs(-3) / 2))", "-1,3988852792"}
         };
 
         public static void testAll()
         {
+            Console.ForegroundColor = ConsoleColor.Green;
             foreach (String problem in problems.Keys)
             {
                 String expectedSolution = problems[problem].Replace(".",",");
@@ -100,17 +99,16 @@ namespace ConsoleCalculator
 
                 if (expectedSolution != actualSolution)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Test problem ({problem}) was unsuccessful");
-                    Console.ResetColor();
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Test problem ({problem}) was successful");
-                    Console.ResetColor();
+                    Console.WriteLine($"Test problem ({problem}) was successful, result was " + actualSolution);
                 }
             }
+            Console.ResetColor();
+            Console.WriteLine($"View all {problems.Keys.Count} test problems above ^ - these were used to ensure everything was working in development, but i left them here, because why not :)");
+
         }
     }
 }

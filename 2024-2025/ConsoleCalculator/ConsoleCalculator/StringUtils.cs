@@ -9,18 +9,6 @@ namespace ConsoleCalculator
 {
     internal class StringUtils
     {
-        public static Dictionary<String, String> inputReplacer = new Dictionary<String, String>()
-            {
-                {"++","+"},
-                {"--","+"},
-                {"+-","-"},
-                {"-+","-"},
-
-                {" ",""},
-                {".",","},
-                {"÷","/"},
-                {"×","*"}
-            };
         public static int[] getInnerMostBracketIndeces(String input)
         {
             int lastOpenBracketIndex = -1;
@@ -33,41 +21,45 @@ namespace ConsoleCalculator
         }
         public static String parseInput(string input)
         {
-            while (true)
+            Dictionary<String, String> inputReplacer = new Dictionary<String, String>()
             {
-                bool end = true;
+                {"++","+"}, {"--","+"}, {"+-","-"}, {"-+","-"},
+                {" ",""}, {".",","},
+                {"÷","/"}, {"×","*"}
+            };
+            
+            while (containsAnythingInArray(input, inputReplacer.Keys.ToArray()))
+            {
+                //Replaces all keys from inputReplacer to their values.
                 foreach (String key in inputReplacer.Keys)
                 {
-                    if (input.Contains(key))
-                    {
-                        input = input.Replace(key, inputReplacer[key]);
-                        end = false;
-                    }
+                    if (input.Contains(key)) input = input.Replace(key, inputReplacer[key]);
                 }
-                if (end) break;
             }
-            return impliedMultiplication(unifyBrackets(input));
+            return impliedMultiplication(replaceVariables(unifyBrackets(input)));
         }
         public static String impliedMultiplication(String input)
         {
+            // This function insures that implied multiplication is handled correctly. Ex. 2(3-1) -> 2×(3-1)
             input = input.Replace("−", "-");
+            //Dictionary with brackets and directions (1 or -1) that point to where the impl. mult. should be.
             Dictionary<String, int> brackets = new Dictionary<String, int>() { { "(", -1 }, { ")", 1 } };
             foreach (String bracket in brackets.Keys)
             {
-                if (input.Contains(bracket))
+                if (!input.Contains(bracket)) continue;
+                int move = brackets[bracket];
+                int index = input.IndexOf(bracket);
+                input = replaceFirst(input, bracket, bracket.Equals("(") ? "[" : "]");
+                //If is in bounds
+                if (index == 0 || index == input.Length - 1) continue;
+                char neighbor = input.ToCharArray()[index + move];
+                //If neighbor is a number, or a different bracket, then add implied multiplication
+                if (Int32.TryParse(Convert.ToString(neighbor), out int num)
+                    || (move == 1 && (neighbor.Equals('(') || neighbor.Equals('[')))
+                    || (move == -1 && (neighbor.Equals(')') || neighbor.Equals(']') || neighbor.Equals('-'))))
                 {
-                    int move = brackets[bracket];
-                    int index = input.IndexOf(bracket);
-                    input = replaceFirst(input, bracket, bracket.Equals("(") ? "[" : "]");
-                    if (index == 0 || index == input.Length - 1) continue;
-                    char neighbor = input.ToCharArray()[index + move];
-                    if (Int32.TryParse(Convert.ToString(neighbor), out int num)
-                        || (move == 1 && (neighbor.Equals('(') || neighbor.Equals('[')))
-                        || (move == -1 && (neighbor.Equals(')') || neighbor.Equals(']') || neighbor.Equals('-'))))
-                    {
-                        String insert = !neighbor.Equals('-') ? "×" : "1×";
-                        input = input.Insert(index + (move == -1 ? 0 : move), insert);
-                    }
+                    String insert = !neighbor.Equals('-') ? "×" : "1×";
+                    input = input.Insert(index + (move == -1 ? 0 : move), insert);
                 }
             }
             if (hasBrackets(input)) return impliedMultiplication(input);
@@ -81,31 +73,19 @@ namespace ConsoleCalculator
         {
             return input.Replace("[", "(").Replace("{", "(").Replace("]", ")").Replace("}", ")");
         }
-        public static bool containsSign(String input, String sign)
+        public static bool containsAnythingInArray(String input, String[] array)
         {
-            if (sign == "*/")
+            foreach (String str in array)
             {
-                bool result = input.Contains("*") || input.Contains("/");
-                return result;
-            }
-            return input.Contains(sign);
-        }
-        public static bool containsAnySign(String input, String[] signs)
-        {
-            foreach (String sign in signs)
-            {
-                if (sign == "*/" && (input.Contains("*") || input.Contains("/"))) return true;
-                else if (input.Contains(sign)) return true;
+                if (str == "*/" && (input.Contains("*") || input.Contains("/"))) return true;
+                else if (input.Contains(str)) return true;
             }
             return false;
         }
         public static String replaceFirst(String str, String term, String replace)
         {
             int position = str.IndexOf(term);
-            if (position < 0)
-            {
-                return str;
-            }
+            if (position < 0) return str;
             str = str.Substring(0, position) + replace + str.Substring(position + term.Length);
             return str;
         }
@@ -119,6 +99,7 @@ namespace ConsoleCalculator
         }
         public static String getNumberOnSideOfString(String input, int moveSide, bool exponentiating)
         {
+            // Variable for loop that either moves from 0->input.Length or from input.Length->0
             for (int i = (moveSide > 0 ? 0 : input.Length); (moveSide > 0 ? i < input.Length : i > 0); i += moveSide)
             {
                 String sub = (moveSide > 0) ? input.Substring(i) : input.Substring(0, i);
@@ -128,10 +109,12 @@ namespace ConsoleCalculator
 
             String finalize(String sub)
             {
+                // Format the string
                 bool bracketed = false;
                 sub = unifyBrackets(sub).Replace("−", "-");
                 String unbracketedSub = removeBrackets(sub);
                 if (sub != unbracketedSub) bracketed = true;
+                // Check if it's a valid double, if so, return it
                 if (double.TryParse(unbracketedSub, out double result))
                 {
                     if (unbracketedSub.StartsWith("-") && !bracketed && exponentiating) sub = sub.Substring(1);
@@ -145,16 +128,29 @@ namespace ConsoleCalculator
         public static String finalizeOutput(String input)
         {
             input = removeBrackets(input).Replace("−", "-");
+            //Round to 10 decimal places
             if (Double.TryParse(input, out double num))
             {
                 double roundPrecision = Math.Pow(10, 10);
                 input = Convert.ToString(Math.Round(num* roundPrecision)/ roundPrecision);
             }
+            Evaluator.variables["ans"] = input;
             return input;
         }
         public static String replaceVariables(String input)
         {
-            return input;
+            //Replace all function occurences with upper case variants, so that they don't get replaced when replacing variables.
+            foreach (String function in Evaluator.functions)
+            {
+                input = input.Replace(function, function.ToUpper());
+            }
+            //Replace variables
+            foreach (String variable in Evaluator.variables.Keys)
+            {
+                input = input.Replace(variable, "("+Evaluator.variables[variable]+")");
+            }
+            //Undo the upper case functions
+            return input.ToLower();
         }
     }
 }
