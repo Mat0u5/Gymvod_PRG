@@ -10,6 +10,7 @@ namespace Battleships
     {
         public const int Size = 10;
         private const char Water = '░';
+        private const char Cursor = '█';
         private const char Ship = '█';
         private const char Hit = 'X';
         private const char Miss = 'O';
@@ -25,12 +26,15 @@ namespace Battleships
                 for (int j = 0; j < Size; j++)
                     cells[i, j] = Water;
         }
-        public void Render(bool showShips = false)
+        public void Render(bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
+            Console.SetCursorPosition(offsetX, offsetY);
             Console.WriteLine("   0 1 2 3 4 5 6 7 8 9");
             string[] rowMarkers = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+
             for (int i = 0; i < Size; i++)
             {
+                Console.SetCursorPosition(offsetX, offsetY + i + 1);
                 Console.Write($" {rowMarkers[i]} ");
                 for (int j = 0; j < Size; j++)
                 {
@@ -40,90 +44,91 @@ namespace Battleships
                         cell = Water;
                     }
 
-                    if (cell == Hit)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                    }
-                    else if (cell == Miss)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    }
-                    else if (cell == Ship)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    }
-
+                    SetCellColor(cell);
                     Console.Write($"{cell}{cell}");
                     Console.ResetColor();
                 }
-                Console.WriteLine();
             }
         }
 
-        public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false)
+        public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
+            Console.SetCursorPosition(offsetX, offsetY);
             Console.WriteLine("   0 1 2 3 4 5 6 7 8 9");
             string[] rowMarkers = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+
             for (int i = 0; i < Size; i++)
             {
+                Console.SetCursorPosition(offsetX, offsetY + i + 1);
                 Console.Write($" {rowMarkers[i]} ");
                 for (int j = 0; j < Size; j++)
                 {
                     char cell = cells[i, j];
 
                     // Highlight ship placement if cursor is active
-                    bool atCursor = i == cursorX && j == cursorY;
-                    bool isHighlighted = false;
-                    if (cursorX >= 0 && cursorY >= 0 && shipLength > 0 &&
-                        ((horizontal && i == cursorX && j >= cursorY && j < cursorY + shipLength) || 
-                        (!horizontal && j == cursorY && i >= cursorX && i < cursorX + shipLength)))
+                    bool isCursor = i == cursorX && j == cursorY;
+                    bool isHighlighted = cursorX >= 0 && cursorY >= 0 && shipLength > 0 &&
+                        ((horizontal && i == cursorX && j >= cursorY && j < cursorY + shipLength) ||
+                         (!horizontal && j == cursorY && i >= cursorX && i < cursorX + shipLength));
+
+                    if (isHighlighted)
                     {
-                        isHighlighted = true;
                         if (IsValidPlacement(cursorX, cursorY, shipLength, horizontal))
-                        {
                             Console.ForegroundColor = ConsoleColor.Green; // Valid placement
+                        else
+                            Console.ForegroundColor = ConsoleColor.Red; // Invalid placement
+                        Console.Write("██");
+                        Console.ResetColor();
+                        continue;
+                    }
+
+                    if (cell == Ship && !showShips)
+                    {
+                        cell = Water;
+                    }
+
+                    SetCellColor(cell);
+
+                    if (isCursor && shipLength == -1)
+                    {
+                        // Only Cursor
+                        cell = Cursor;
+                        if (!IsShot(i, j))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.Red; // Invalid placement
+                            Console.ForegroundColor = ConsoleColor.Red;
                         }
                     }
-                    else if (cell == Ship && !showShips)
-                    {
-                        cell = Water;
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    }
-                    else if (cell == Hit)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                    }
-                    else if (cell == Miss)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    }
-                    else if (cell == Ship)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                    }
-
-                    if (atCursor && shipLength == -1)
-                    {
-                        // No ship, just showing cursor
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        cell = '█';
-                    }
-                    Console.Write(isHighlighted ? "██" : $"{cell}{cell}");
+                    Console.Write($"{cell}{cell}");
                     Console.ResetColor();
                 }
-                Console.WriteLine();
+            }
+        }
+        public bool IsShot(int i, int j)
+        {
+            char cell = cells[i, j];
+            return cell == Hit || cell == Miss;
+        }
+
+        private void SetCellColor(char cell)
+        {
+            switch (cell)
+            {
+                case Hit:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case Miss:
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    break;
+                case Ship:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    break;
             }
         }
         public bool PlaceShip(int x, int y, int length, bool horizontal)
@@ -132,9 +137,9 @@ namespace Battleships
 
             for (int i = 0; i < length; i++)
             {
-                int nx = x + (horizontal ? 0 : i);
-                int ny = y + (horizontal ? i : 0);
-                cells[nx, ny] = Ship;
+                int shipX = x + (horizontal ? 0 : i);
+                int shipY = y + (horizontal ? i : 0);
+                cells[shipX, shipY] = Ship;
             }
             return true;
         }
@@ -143,17 +148,28 @@ namespace Battleships
         {
             for (int i = 0; i < length; i++)
             {
-                int nx = x + (horizontal ? 0 : i);
-                int ny = y + (horizontal ? i : 0);
+                int placementX = x + (horizontal ? 0 : i);
+                int placementY = y + (horizontal ? i : 0);
 
-                // Ensure within bounds
-                if (nx < 0 || nx >= Size || ny < 0 || ny >= Size || cells[nx, ny] != Water)
-                    return false;
-
-                // Check orthogonal neighbors only (no diagonal checks)
-                foreach (var (dx, dy) in new[] { (-1, 0), (1, 0), (0, -1), (0, 1) })
+                // Ensure its within bounds of grid
+                if (placementX < 0 || placementX >= Size || placementY < 0 || 
+                    placementY >= Size || cells[placementX, placementY] != Water)
                 {
-                    int adjX = nx + dx, adjY = ny + dy;
+                    return false;
+                }
+
+                // Save neighbors as List of KeyValuePairs, SINCE I CANT USE A DICT because of same keys lol
+                List<KeyValuePair<int, int>> neighbors = new List<KeyValuePair<int, int>>()
+                {
+                    {new KeyValuePair<int, int>(1, 0)},
+                    {new KeyValuePair<int, int>(-1, 0)},
+                    {new KeyValuePair<int, int>(0, 1)},
+                    {new KeyValuePair<int, int>(0, -1)}
+                };
+                // Checking neighbors
+                foreach (KeyValuePair<int, int> entry in neighbors)
+                {
+                    int adjX = placementX + entry.Key, adjY = placementY + entry.Value;
                     if (adjX >= 0 && adjX < Size && adjY >= 0 && adjY < Size && cells[adjX, adjY] == Ship)
                         return false;
                 }

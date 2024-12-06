@@ -46,7 +46,8 @@ namespace Battleships
                 while (!placed)
                 {
                     Console.Clear();
-                    Grid.Render(true);
+                    Console.WriteLine("Place your ships:");
+                    Console.WriteLine($"Place a ship of sizes 5x1, 4x1, 3x1, 3x1, 2x1 (Use arrow keys, Spacebar to rotate, Enter to confirm):\n");
 
                     placed = PlaceShipInteractively(size);
                 }
@@ -62,10 +63,7 @@ namespace Battleships
 
             do
             {
-                Console.Clear();
-                Console.WriteLine("Place your ships: \n");
-                Console.WriteLine($"Place a ship of size {shipLength}x1 (Use arrow keys, Spacebar to rotate, Enter to confirm):");
-                Grid.RenderInteractive(cursorX, cursorY, shipLength, horizontal, true);
+                Grid.RenderInteractive(cursorX, cursorY, shipLength, horizontal, true, 0, 3);
 
                 key = Console.ReadKey(true).Key;
                 switch (key)
@@ -91,14 +89,7 @@ namespace Battleships
 
             do
             {
-                Console.Clear();
-                Console.WriteLine("Your Board (with your ships):");
-                Grid.Render(true); // Player's board with ships
-                Console.WriteLine("\nOpponent's Board (your shooting):");
-                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, true, false); // Highlight only on the opponent's board
-
-                Console.WriteLine("\nUse arrow keys to move, Enter to shoot.");
-
+                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, true, false, 0, 16); // Render opponent's grid
                 key = Console.ReadKey(true).Key;
                 switch (key)
                 {
@@ -106,8 +97,9 @@ namespace Battleships
                     case ConsoleKey.DownArrow: cursorX = Math.Min(Grid.Size - 1, cursorX + 1); break;
                     case ConsoleKey.LeftArrow: cursorY = Math.Max(0, cursorY - 1); break;
                     case ConsoleKey.RightArrow: cursorY = Math.Min(Grid.Size - 1, cursorY + 1); break;
-                    case ConsoleKey.Enter: opponent.Grid.Shoot(cursorX, cursorY);
-                    return opponent.Grid.AllShipsSunk();
+                    case ConsoleKey.Enter: 
+                        opponent.Grid.Shoot(cursorX, cursorY);
+                        return opponent.Grid.AllShipsSunk();
                 }
             } while (key != ConsoleKey.Escape);
 
@@ -115,9 +107,15 @@ namespace Battleships
         }
         public bool TakeTurnAI()
         {
-            int cursorX = rand.Next(10);
-            int cursorY = rand.Next(10);
+            int cursorX = 0;
+            int cursorY = 0;
+            do
+            {
+                cursorX = rand.Next(10);
+                cursorY = rand.Next(10);
+            } while (opponent.Grid.IsShot(cursorX, cursorY));
             opponent.Grid.Shoot(cursorX, cursorY);
+            opponent.Grid.Render(true, 0, 2); // Render player's grid
             return opponent.Grid.AllShipsSunk();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,39 +29,39 @@ namespace Battleships
 
             player.opponent.PlaceShips();
 
-            Console.WriteLine("\nStarting the game!");
             playerTurn = true;
+
+            Console.Clear();
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine("Your Board (with your ships):");
+            Console.SetCursorPosition(0, 14);
+            Console.WriteLine("Opponent's Board (your shooting):");
+            Console.WriteLine("Use arrow keys to move, Enter to shoot.");
+            player.Grid.Render(true, 0, 2); // Render player's grid
 
             // Main game loop
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("Your Board (with your ships):");
-                player.Grid.Render(true);
-                Console.WriteLine("\nYour Shooting Board (opponent's view):");
-                player.opponent.Grid.Render();
-
                 if (playerTurn)
                 {
-                    Console.WriteLine("\nYour turn! Use arrow keys and Enter to shoot.");
                     if (player.TakeTurn())
                     {
-                        Console.WriteLine("You won! All enemy ships have been sunk!");
+                        Console.WriteLine("\n\nYou won! All enemy ships have been sunk!");
                         break;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("\nAI's turn...");
                     if (player.opponent.TakeTurnAI())
                     {
-                        Console.WriteLine("You lost! All your ships have been sunk!");
+                        Console.WriteLine("\n\nYou lost! All your ships have been sunk!");
                         break;
                     }
                 }
 
                 playerTurn = !playerTurn;
             }
+            Console.ReadKey();
         }
 
     }
