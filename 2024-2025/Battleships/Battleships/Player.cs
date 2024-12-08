@@ -16,6 +16,10 @@ namespace Battleships
         private Random rand;
         public int cursorX = 0, cursorY = 0;
         private int difficulty = 1;
+        private int remainingBombShots = 1; // 3x3 shot
+        private int remainingLineShots = 3; // 1x3 shot
+        private int selectedShot = 1; // 1: single shot, 2: 3x3, 3: 1x3
+        private bool lineHorizontal = false;
 
         public Player(string name, bool isAI, Player opponent)
         {
@@ -74,7 +78,7 @@ namespace Battleships
                 cursorY = Math.Max(0, cursorY);
                 cursorY = Math.Min(Grid.Size - (horizontal ? shipLength : 1), cursorY);
 
-                Grid.RenderInteractive(cursorX, cursorY, shipLength, horizontal, true, 0, 3);
+                Grid.RenderInteractive(cursorX, cursorY, shipLength, horizontal, true, 0, 3, -1);
 
                 key = Console.ReadKey(true).Key;
                 switch (key)
@@ -102,7 +106,8 @@ namespace Battleships
 
             do
             {
-                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, true, false, 0, Grid.Size+6); // Render opponent's grid
+                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, lineHorizontal, false, 0, Grid.Size+6, selectedShot); // Render opponent's grid
+                RenderShotOptions(); // Display shot options
                 key = Console.ReadKey(true).Key;
                 switch (key)
                 {
@@ -111,21 +116,96 @@ namespace Battleships
                     case ConsoleKey.DownArrow: cursorX = Math.Min(Grid.Size - 1, cursorX + 1); break;
                     case ConsoleKey.LeftArrow: cursorY = Math.Max(0, cursorY - 1); break;
                     case ConsoleKey.RightArrow: cursorY = Math.Min(Grid.Size - 1, cursorY + 1); break;
+                    case ConsoleKey.Spacebar: lineHorizontal = !lineHorizontal; break;
+                    case ConsoleKey.NumPad1:
+                    case ConsoleKey.D1: selectedShot = 1; break; // Single shot
+                    case ConsoleKey.NumPad2:
+                    case ConsoleKey.D2: if (remainingBombShots > 0) selectedShot = 2; break; // 3x3 shot
+                    case ConsoleKey.NumPad3:
+                    case ConsoleKey.D3: if (remainingLineShots > 0) selectedShot = 3; break; // 1x3 shot
                     case ConsoleKey.Enter:
-                        if (opponent.Grid.IsShot(cursorX, cursorY)) break;
-                        opponent.Grid.Shoot(cursorX, cursorY);
-                        return opponent.Grid.AllShipsSunk();
+                        if (selectedShot == 1)
+                        {
+                            //Single Shot
+                            if (!opponent.Grid.IsShot(cursorX, cursorY))
+                            {
+                                opponent.Grid.Shoot(cursorX, cursorY);
+                                return opponent.Grid.AllShipsSunk();
+                            }
+                            break;
+                        }
+                        if (selectedShot == 2)
+                        {
+                            //3x3 Bomb Shot
+                            if (remainingBombShots > 0)
+                            {
+                                opponent.Grid.ShootArea(cursorX, cursorY, 3, 3);
+                                remainingBombShots--;
+                                if (remainingBombShots == 0) selectedShot = 1;
+                                return opponent.Grid.AllShipsSunk();
+                            }
+                            break;
+                        }
+                        if (selectedShot == 3)
+                        {
+                            //1x3 Line Shot
+                            if (remainingLineShots > 0)
+                            {
+                                if (!lineHorizontal) opponent.Grid.ShootArea(cursorX, cursorY, 1, 3);
+                                else opponent.Grid.ShootArea(cursorX, cursorY, 3, 1);
+                                remainingLineShots--;
+                                if (remainingLineShots == 0) selectedShot = 1;
+                                return opponent.Grid.AllShipsSunk();
+                            }
+                            break;
+                        }
+                        break;
                 }
             } while (key != ConsoleKey.Escape);
 
             return false;
         }
+        private void RenderShotOptions()
+        {
+            int offsetX = Grid.Size * 2 + 10;
+            int offsetY = ((int)(Grid.Size * 1.5)) + 6;
+            Console.SetCursorPosition(offsetX, offsetY);
+            Console.Write("Selected Shot: " +
+                (selectedShot == 1 ? "Single Tile                    " : selectedShot == 2 ?
+                "3x3 Bomb                      " : "1x3 Line (Spacebar to rotate)"));
+            Console.SetCursorPosition(offsetX, offsetY + 1);
+            Console.Write($"Single Tile Shot             (Press 1 to select)");
+            Console.SetCursorPosition(offsetX, offsetY + 2);
+            Console.Write($"Remaining 3x3 Bomb Shots: {remainingBombShots}  (Press 2 to select)");
+            Console.SetCursorPosition(offsetX, offsetY + 3);
+            Console.Write($"Remaining 1x3 Line Shots: {remainingLineShots}  (Press 3 to select)");
+        }
+        public void RenderAIShotOptions()
+        {
+            int offsetX = Grid.Size * 2 + 10;
+            int offsetY = ((int)(Grid.Size * 0.5)) + 1;
+            Console.SetCursorPosition(offsetX, offsetY);
+            Console.SetCursorPosition(offsetX, offsetY + 1);
+            Console.Write($"Remaining 3x3 Bomb Shots: {remainingBombShots}");
+            Console.SetCursorPosition(offsetX, offsetY + 2);
+            Console.Write($"Remaining 1x3 Line Shots: {remainingLineShots}");
+        }
+
+
+
+        /*
+         * AI STUFF BELOW
+         */
+
+
         public bool TakeTurnAI()
         {
-            if (difficulty == 1) return AITurnEasy();
-            else if (difficulty == 2) return AITurnNormal();
-            else if (difficulty == 3) return AITurnHard();
-            return false;
+            bool returnVal = false;
+            if (difficulty == 1) returnVal = AITurnEasy();
+            else if (difficulty == 2) returnVal =  AITurnNormal();
+            else if (difficulty == 3) returnVal =  AITurnHard();
+            RenderAIShotOptions();
+            return returnVal;
         }
         public bool AITurnEasy()
         {
@@ -137,7 +217,7 @@ namespace Battleships
                 cursorY = rand.Next(opponent.Grid.Size);
             } while (opponent.Grid.IsShot(cursorX, cursorY));
 
-            opponent.Grid.Shoot(cursorX, cursorY);
+            shootRandomWeapon(cursorX, cursorY);
             opponent.Grid.Render(true, 0, 2); // Render player's grid
             return opponent.Grid.AllShipsSunk();
         }
@@ -162,7 +242,7 @@ namespace Battleships
                     y = rand.Next(opponent.Grid.Size);
                 } while (opponent.Grid.IsShot(x, y));
 
-                if (opponent.Grid.Shoot(x, y))
+                if (shootRandomWeapon(x, y))
                 {
                     // If a ship is hit, switch to hunting mode and add adjacent cells to targets
                     huntingMode = true;
@@ -180,7 +260,7 @@ namespace Battleships
                 {
                     return AITurnNormal();
                 }
-                if (opponent.Grid.Shoot(x, y))
+                if (shootRandomWeapon(x, y))
                 {
                     // If the shot hits, add more adjacent cells for further hunting
                     AddAdjacentTargets(x, y);
@@ -196,6 +276,10 @@ namespace Battleships
         {
             if (checkerboardTargets.Count == 0)
             {
+                if (opponent.Grid.IsShot(0,0))
+                {
+                    return AITurnNormal();
+                }
                 InitializeCheckerboardTargets();
             }
 
@@ -220,7 +304,7 @@ namespace Battleships
             {
                 return AITurnHard();
             }
-            if (opponent.Grid.Shoot(x, y))
+            if (shootRandomWeapon(x, y))
             {
                 // If a ship is hit, switch to hunting mode and add adjacent cells to targets
                 AddAdjacentTargets(x, y);
@@ -228,6 +312,24 @@ namespace Battleships
 
             opponent.Grid.Render(true, 0, 2); // Render player's grid
             return opponent.Grid.AllShipsSunk();
+        }
+        public bool shootRandomWeapon(int shootX, int shootY)
+        {
+            if (remainingBombShots > 0 && rand.Next(40)==0)
+            {
+                remainingBombShots--;
+                return opponent.Grid.ShootArea(shootX, shootY, 3, 3);
+            }
+            else if (remainingLineShots > 0 && rand.Next(15) == 0)
+            {
+                remainingLineShots--;
+                if (rand.Next(1) == 0) return opponent.Grid.ShootArea(shootX, shootY, 3, 1);
+                else return opponent.Grid.ShootArea(shootX, shootY, 1, 3);
+            }
+            else
+            {
+                return opponent.Grid.Shoot(shootX, shootY);
+            }
         }
         private void AddAdjacentTargets(int x, int y)
         {

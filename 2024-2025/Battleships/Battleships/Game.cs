@@ -10,8 +10,8 @@ namespace Battleships
         public void Start()
         {
             Console.Clear();
-            Console.WriteLine("Welcome to Battleships!");
-            Console.WriteLine("Use arrow keys to navigate, press Enter to confirm actions.");
+            Console.WriteLine("  ____        _   _   _           _     _           \r\n |  _ \\      | | | | | |         | |   (_)          \r\n | |_) | __ _| |_| |_| | ___  ___| |__  _ _ __  ___ \r\n |  _ < / _` | __| __| |/ _ \\/ __| '_ \\| | '_ \\/ __|\r\n | |_) | (_| | |_| |_| |  __/\\__ \\ | | | | |_) \\__ \\\r\n |____/ \\__,_|\\__|\\__|_|\\___||___/_| |_|_| .__/|___/\r\n                                         | |        \r\n                                         |_|        ");
+            Console.WriteLine("\nUse arrow keys to navigate, press Enter to confirm actions.");
             Console.WriteLine("Press enter to continue.");
             while (Console.ReadKey().Key != ConsoleKey.Enter)
             {
@@ -20,7 +20,7 @@ namespace Battleships
 
             // Let the player select the grid size
             Console.Clear();
-            Console.WriteLine("Type out the your desired size (square of length), press Enter to confirm.");
+            Console.WriteLine("Type out the your desired grid length (the grid will be length x length), press Enter to confirm.");
             int gridSize = GetIntInput(6, 50);
 
             //Select opponent difficulty
@@ -28,7 +28,7 @@ namespace Battleships
             Console.WriteLine("Select AI difficulty:");
             Console.WriteLine("1: Easy        (Random shooting)");
             Console.WriteLine("2: Normal      (Random shooting + tries to sink ships when it finds them)");
-            Console.WriteLine("3: Hard        (Actual strategy)");
+            Console.WriteLine("3: Hard        (Checkerboard strategy - might be worse than Normal diff, i don't know xD)");
             Console.WriteLine("\n Type out your number, press Enter to confirm.");
             int difficulty = GetIntInput(1, 3);
 
@@ -49,6 +49,7 @@ namespace Battleships
             Console.WriteLine("Opponent's Board:");
             Console.WriteLine("Use arrow keys to move, press Enter to shoot.");
             player.Grid.Render(true, 0, 2); // Render player's grid
+            player.opponent.RenderAIShotOptions();
 
             // Main game loop
             playerTurn = true;

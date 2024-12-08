@@ -59,7 +59,7 @@ namespace Battleships
             }
         }
 
-        public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false, int offsetX = 0, int offsetY = 0)
+        public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false, int offsetX = 0, int offsetY = 0, int selectedShot = -1)
         {
             Console.SetCursorPosition(offsetX, offsetY);
             RenderLetters();
@@ -73,7 +73,29 @@ namespace Battleships
                     char cell = cells[i, j];
 
                     // Highlight ship placement if cursor is active
-                    bool isCursor = i == cursorX && j == cursorY;
+                    bool isCursor = false;
+                    if (selectedShot > 0)
+                    {
+                        if (selectedShot == 1)
+                        {
+                            isCursor = i == cursorX && j == cursorY;
+                        }
+                        else if (selectedShot == 2)
+                        {
+                            isCursor = Math.Abs(i - cursorX) <= 1 && Math.Abs(j - cursorY) <= 1;
+                        }
+                        else if (selectedShot == 3)
+                        {
+                            if (horizontal)
+                            {
+                                isCursor = i == cursorX && Math.Abs(j - cursorY) <= 1;
+                            }
+                            else
+                            {
+                                isCursor = Math.Abs(i - cursorX) <= 1 && j == cursorY;
+                            }
+                        }
+                    }
                     bool isHighlighted = cursorX >= 0 && cursorY >= 0 && shipLength > 0 &&
                         ((horizontal && i == cursorX && j >= cursorY && j < cursorY + shipLength) ||
                          (!horizontal && j == cursorY && i >= cursorX && i < cursorX + shipLength));
@@ -227,6 +249,21 @@ namespace Battleships
             }
 
             return false;
+        }
+        public bool ShootArea(int centerX, int centerY, int width, int height)
+        {
+            bool hit = false;
+            for (int x = Math.Max(0, centerX - height / 2); x <= Math.Min(Size - 1, centerX + height / 2); x++)
+            {
+                for (int y = Math.Max(0, centerY - width / 2); y <= Math.Min(Size - 1, centerY + width / 2); y++)
+                {
+                    if (!IsShot(x, y) && Shoot(x, y))
+                    {
+                        hit = true;
+                    }
+                }
+            }
+            return hit;
         }
 
         public bool AllShipsSunk()
