@@ -40,15 +40,15 @@ namespace Battleships
                 return;
             }
 
+            Console.Clear();
+            Console.WriteLine("Place your ships:");
+            Console.WriteLine($"Place a ship of sizes 5x1, 4x1, 3x1, 3x1, 2x1 (Use arrow keys, Spacebar to rotate, Enter to confirm):\n");
+
             foreach (int size in shipSizes)
             {
                 bool placed = false;
                 while (!placed)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Place your ships:");
-                    Console.WriteLine($"Place a ship of sizes 5x1, 4x1, 3x1, 3x1, 2x1 (Use arrow keys, Spacebar to rotate, Enter to confirm):\n");
-
                     placed = PlaceShipInteractively(size);
                 }
             }
@@ -63,15 +63,22 @@ namespace Battleships
 
             do
             {
+                //Clamp the cursor+ship position so that its within the grid.
+                cursorX = Math.Max(0, cursorX);
+                cursorX = Math.Min(Grid.Size - (horizontal ? 1 : shipLength), cursorX);
+                cursorY = Math.Max(0, cursorY);
+                cursorY = Math.Min(Grid.Size - (horizontal ? shipLength : 1), cursorY);
+
                 Grid.RenderInteractive(cursorX, cursorY, shipLength, horizontal, true, 0, 3);
 
                 key = Console.ReadKey(true).Key;
                 switch (key)
                 {
-                    case ConsoleKey.UpArrow: cursorX = Math.Max(0, cursorX - 1); break;
-                    case ConsoleKey.DownArrow: cursorX = Math.Min(Grid.Size - 1, cursorX + 1); break;
-                    case ConsoleKey.LeftArrow: cursorY = Math.Max(0, cursorY - 1); break;
-                    case ConsoleKey.RightArrow: cursorY = Math.Min(Grid.Size - 1, cursorY + 1); break;
+                    // Movement, placing conformation.
+                    case ConsoleKey.UpArrow: cursorX = cursorX - 1; break;
+                    case ConsoleKey.DownArrow: cursorX = cursorX + 1; break;
+                    case ConsoleKey.LeftArrow: cursorY = cursorY - 1; break;
+                    case ConsoleKey.RightArrow: cursorY = cursorY + 1; break;
                     case ConsoleKey.Spacebar: horizontal = !horizontal; break;
                     case ConsoleKey.Enter:
                         if (Grid.PlaceShip(cursorX, cursorY, shipLength, horizontal))
@@ -93,11 +100,13 @@ namespace Battleships
                 key = Console.ReadKey(true).Key;
                 switch (key)
                 {
+                    // Movement, shooting conformation.
                     case ConsoleKey.UpArrow: cursorX = Math.Max(0, cursorX - 1); break;
                     case ConsoleKey.DownArrow: cursorX = Math.Min(Grid.Size - 1, cursorX + 1); break;
                     case ConsoleKey.LeftArrow: cursorY = Math.Max(0, cursorY - 1); break;
                     case ConsoleKey.RightArrow: cursorY = Math.Min(Grid.Size - 1, cursorY + 1); break;
-                    case ConsoleKey.Enter: 
+                    case ConsoleKey.Enter:
+                        if (opponent.Grid.IsShot(cursorX, cursorY)) break;
                         opponent.Grid.Shoot(cursorX, cursorY);
                         return opponent.Grid.AllShipsSunk();
                 }
@@ -111,6 +120,7 @@ namespace Battleships
             int cursorY = 0;
             do
             {
+                // Choose random position until you find one that has not been shot yet.
                 cursorX = rand.Next(10);
                 cursorY = rand.Next(10);
             } while (opponent.Grid.IsShot(cursorX, cursorY));
@@ -118,8 +128,5 @@ namespace Battleships
             opponent.Grid.Render(true, 0, 2); // Render player's grid
             return opponent.Grid.AllShipsSunk();
         }
-
-
-
     }
 }

@@ -12,9 +12,12 @@ namespace Battleships
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.CursorVisible = false;
-
-            Game game = new Game();
-            game.Start();
+            while(true)
+            {
+                // Loop allows you to start a new game after one ends.
+                Game game = new Game();
+                game.Start();
+            }
         }
     }
 }

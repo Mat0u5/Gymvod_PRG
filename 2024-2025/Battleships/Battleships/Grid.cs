@@ -8,7 +8,7 @@ namespace Battleships
 {
     internal class Grid
     {
-        public const int Size = 10;
+        public int Size = 10;
         private const char Water = '░';
         private const char Cursor = '█';
         private const char Ship = '█';
@@ -21,21 +21,27 @@ namespace Battleships
         {
             cells = new char[Size, Size];
             rand = new Random();
-
+            InitializeGrid();
+        }
+        public void InitializeGrid()
+        {
             for (int i = 0; i < Size; i++)
+            {
                 for (int j = 0; j < Size; j++)
+                {
                     cells[i, j] = Water;
+                }
+            }
         }
         public void Render(bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
             Console.SetCursorPosition(offsetX, offsetY);
-            Console.WriteLine("   0 1 2 3 4 5 6 7 8 9");
-            string[] rowMarkers = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            Console.WriteLine("   A B C D E F G H I J");
 
             for (int i = 0; i < Size; i++)
             {
                 Console.SetCursorPosition(offsetX, offsetY + i + 1);
-                Console.Write($" {rowMarkers[i]} ");
+                Console.Write($" {i} ");
                 for (int j = 0; j < Size; j++)
                 {
                     char cell = cells[i, j];
@@ -54,13 +60,12 @@ namespace Battleships
         public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
             Console.SetCursorPosition(offsetX, offsetY);
-            Console.WriteLine("   0 1 2 3 4 5 6 7 8 9");
-            string[] rowMarkers = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            Console.WriteLine("   A B C D E F G H I J");
 
             for (int i = 0; i < Size; i++)
             {
                 Console.SetCursorPosition(offsetX, offsetY + i + 1);
-                Console.Write($" {rowMarkers[i]} ");
+                Console.Write($" {i} ");
                 for (int j = 0; j < Size; j++)
                 {
                     char cell = cells[i, j];
@@ -198,26 +203,52 @@ namespace Battleships
         public bool AllShipsSunk()
         {
             for (int i = 0; i < Size; i++)
+            {
                 for (int j = 0; j < Size; j++)
+                {
                     if (cells[i, j] == Ship) return false;
+                }
+            }
 
             return true;
         }
 
         public void RandomPlacement(int[] shipSizes)
         {
+            Console.WriteLine("__test");
+            int maxIterations = Size * Size * Size;
+            bool maxReached = false;
             foreach (int size in shipSizes)
             {
+                if (maxReached) break;
+                int currentIter = 0;
                 bool placed = false;
                 while (!placed)
                 {
+                    currentIter++;
+                    // Since it's possible to choose ship locations in games with a low grid size, we set a maxIterations variable,
+                    //  if we then reach that number, we throw away the current ship positions and start over.
+                    if (currentIter > maxIterations)
+                    {
+                        maxReached = true;
+                        break;
+                    }
                     int x = rand.Next(Size);
                     int y = rand.Next(Size);
                     bool horizontal = rand.Next(2) == 0;
                     placed = PlaceShip(x, y, size, horizontal); // Only proceed if the placement succeeds
                 }
             }
+            if (maxReached)
+            {
+                //Reset all ship locations and start over.
+                InitializeGrid();
+                RandomPlacement(shipSizes);
+            }
         }
-
+        public void SetSize(int size)
+        {
+            Size = size;
+        }
     }
 }
