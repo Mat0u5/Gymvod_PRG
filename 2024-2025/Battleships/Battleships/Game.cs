@@ -11,7 +11,7 @@ namespace Battleships
         {
             Console.Clear();
             Console.WriteLine("Welcome to Battleships!");
-            Console.WriteLine("Use arrow keys to navigate, Enter to confirm actions.");
+            Console.WriteLine("Use arrow keys to navigate, press Enter to confirm actions.");
             Console.WriteLine("Press enter to continue.");
             while (Console.ReadKey().Key != ConsoleKey.Enter)
             {
@@ -19,9 +19,23 @@ namespace Battleships
             }
 
             // Let the player select the grid size
-            int gridSize = GetDimensionInput();
+            Console.Clear();
+            Console.WriteLine("Type out the your desired size (square of length), press Enter to confirm.");
+            int gridSize = GetIntInput(6, 50);
+
+            //Select opponent difficulty
+            Console.Clear();
+            Console.WriteLine("Select AI difficulty:");
+            Console.WriteLine("1: Easy        (Random shooting)");
+            Console.WriteLine("2: Normal      (Random shooting + tries to sink ships when it finds them)");
+            Console.WriteLine("3: Hard        (Actual strategy)");
+            Console.WriteLine("\n Type out your number, press Enter to confirm.");
+            int difficulty = GetIntInput(1, 3);
+
+
             // Place ships
             player = new Player("Player", false, null);
+            player.opponent.SetDifficulty(difficulty);
             player.Grid.SetSize(gridSize);
             player.opponent.Grid.SetSize(gridSize);
             player.PlaceShips();
@@ -30,10 +44,10 @@ namespace Battleships
             // Info & Render both boards
             Console.Clear();
             Console.SetCursorPosition(0, 0);
-            Console.WriteLine("Your Board (AI's POV):");
-            Console.SetCursorPosition(0, 14);
+            Console.WriteLine("Your Board (Opponent's POV):");
+            Console.SetCursorPosition(0, gridSize+4);
             Console.WriteLine("Opponent's Board:");
-            Console.WriteLine("Use arrow keys to move, Enter to shoot.");
+            Console.WriteLine("Use arrow keys to move, press Enter to shoot.");
             player.Grid.Render(true, 0, 2); // Render player's grid
 
             // Main game loop
@@ -45,7 +59,7 @@ namespace Battleships
                     if (player.TakeTurn())
                     {
                         //TakeTurn() returns true if all enemy ships are sunk
-                        Console.SetCursorPosition(0, 26);
+                        Console.SetCursorPosition(0, gridSize * 2 + 6);
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("\n\nYou won! All enemy ships have been sunk!");
                         break;
@@ -56,7 +70,7 @@ namespace Battleships
                     if (player.opponent.TakeTurnAI())
                     {
                         //TakeTurn() returns true if all enemy ships are sunk
-                        Console.SetCursorPosition(0, 26);
+                        Console.SetCursorPosition(0, gridSize * 2 + 6);
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("\n\nYou lost! All your ships have been sunk!");
                         break;
@@ -69,20 +83,19 @@ namespace Battleships
             Console.WriteLine("\nPress SPACEBAR to start a new game.");
             while (Console.ReadKey().Key != ConsoleKey.Spacebar);
         }
-        public int GetDimensionInput()
+        public int GetIntInput(int min, int max)
         {
-            Console.WriteLine("Type out the your desired size (square of length):");
             while (true)
             {
-                if (Int32.TryParse(Console.ReadLine(), out int size))
+                if (Int32.TryParse(Console.ReadLine(), out int num))
                 {
                     //Make sure its within bounds
-                    if (size < 6 || size > 50)
+                    if (num < min || num > max)
                     {
-                        Console.WriteLine("The size must be between 6 and 50");
+                        Console.WriteLine("The number must be between "+ min+" and "+max);
                         continue;
                     }
-                    return size;
+                    return num;
                 }
                 Console.WriteLine("Invalid input. Try again.");
             }

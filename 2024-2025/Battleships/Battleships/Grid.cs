@@ -16,15 +16,17 @@ namespace Battleships
         private const char Miss = 'O';
         private char[,] cells;
         private Random rand;
+        private List<List<int[]>> ships = new List<List<int[]>>(); // Track all ships by their coordinates
+
 
         public Grid()
         {
-            cells = new char[Size, Size];
             rand = new Random();
             InitializeGrid();
         }
         public void InitializeGrid()
         {
+            cells = new char[Size, Size];
             for (int i = 0; i < Size; i++)
             {
                 for (int j = 0; j < Size; j++)
@@ -36,12 +38,12 @@ namespace Battleships
         public void Render(bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
             Console.SetCursorPosition(offsetX, offsetY);
-            Console.WriteLine("   A B C D E F G H I J");
+            RenderLetters();
 
             for (int i = 0; i < Size; i++)
             {
                 Console.SetCursorPosition(offsetX, offsetY + i + 1);
-                Console.Write($" {i} ");
+                RenderNumbers(i+1);
                 for (int j = 0; j < Size; j++)
                 {
                     char cell = cells[i, j];
@@ -60,12 +62,12 @@ namespace Battleships
         public void RenderInteractive(int cursorX = -1, int cursorY = -1, int shipLength = 0, bool horizontal = true, bool showShips = false, int offsetX = 0, int offsetY = 0)
         {
             Console.SetCursorPosition(offsetX, offsetY);
-            Console.WriteLine("   A B C D E F G H I J");
+            RenderLetters();
 
             for (int i = 0; i < Size; i++)
             {
                 Console.SetCursorPosition(offsetX, offsetY + i + 1);
-                Console.Write($" {i} ");
+                RenderNumbers(i+1);
                 for (int j = 0; j < Size; j++)
                 {
                     char cell = cells[i, j];
@@ -112,6 +114,30 @@ namespace Battleships
                 }
             }
         }
+        public void RenderLetters()
+        {
+            if (Size < 10) Console.Write("   ");
+            else Console.Write("    ");
+
+            for (int i = 0; i < Size; i++)
+            {
+                //Writes the i-th character
+                Console.Write($"{(char)('A' + i)} ");
+            }
+            Console.WriteLine();
+        }
+        public void RenderNumbers(int i)
+        {
+            if (Size < 10)
+            {
+                Console.Write($" {i} ");
+            }
+            else
+            {
+                if (i < 10) Console.Write($"  {i} ");
+                else Console.Write($" {i} ");
+            }
+        }
         public bool IsShot(int i, int j)
         {
             char cell = cells[i, j];
@@ -140,12 +166,15 @@ namespace Battleships
         {
             if (!IsValidPlacement(x, y, length, horizontal)) return false;
 
+            List<int[]> shipCoordinates = new List<int[]>();
             for (int i = 0; i < length; i++)
             {
                 int shipX = x + (horizontal ? 0 : i);
                 int shipY = y + (horizontal ? i : 0);
                 cells[shipX, shipY] = Ship;
+                shipCoordinates.Add(new int[] { shipX, shipY });
             }
+            ships.Add(shipCoordinates);
             return true;
         }
 
@@ -215,7 +244,6 @@ namespace Battleships
 
         public void RandomPlacement(int[] shipSizes)
         {
-            Console.WriteLine("__test");
             int maxIterations = Size * Size * Size;
             bool maxReached = false;
             foreach (int size in shipSizes)
@@ -249,6 +277,7 @@ namespace Battleships
         public void SetSize(int size)
         {
             Size = size;
+            InitializeGrid();
         }
     }
 }

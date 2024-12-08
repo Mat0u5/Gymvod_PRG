@@ -8,12 +8,14 @@ namespace Battleships
 {
     internal class Player
     {
+        // Class for the actual Player AND the AI (i was lazy ok)
         public string Name { get; }
         public Grid Grid { get; }
         public Player opponent;
         private bool isAI;
         private Random rand;
         public int cursorX = 0, cursorY = 0;
+        private int difficulty = 1;
 
         public Player(string name, bool isAI, Player opponent)
         {
@@ -36,6 +38,7 @@ namespace Battleships
             int[] shipSizes = { 5, 4, 3, 3, 2 };
             if (isAI)
             {
+                // Ai places ships randomly
                 Grid.RandomPlacement(shipSizes);
                 return;
             }
@@ -46,6 +49,7 @@ namespace Battleships
 
             foreach (int size in shipSizes)
             {
+                // Iterate over all ships and place them interactively
                 bool placed = false;
                 while (!placed)
                 {
@@ -58,6 +62,7 @@ namespace Battleships
 
         public bool PlaceShipInteractively(int shipLength)
         {
+            // Placing ships at the beginning of the game.
             bool horizontal = true;
             ConsoleKey key;
 
@@ -92,11 +97,12 @@ namespace Battleships
 
         public bool TakeTurn()
         {
+            // Players turn
             ConsoleKey key;
 
             do
             {
-                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, true, false, 0, 16); // Render opponent's grid
+                opponent.Grid.RenderInteractive(cursorX, cursorY, -1, true, false, 0, Grid.Size+6); // Render opponent's grid
                 key = Console.ReadKey(true).Key;
                 switch (key)
                 {
@@ -116,17 +122,151 @@ namespace Battleships
         }
         public bool TakeTurnAI()
         {
-            int cursorX = 0;
-            int cursorY = 0;
+            if (difficulty == 1) return AITurnEasy();
+            else if (difficulty == 2) return AITurnNormal();
+            else if (difficulty == 3) return AITurnHard();
+            return false;
+        }
+        public bool AITurnEasy()
+        {
+            // Random shooting mode
             do
             {
                 // Choose random position until you find one that has not been shot yet.
-                cursorX = rand.Next(10);
-                cursorY = rand.Next(10);
+                cursorX = rand.Next(opponent.Grid.Size);
+                cursorY = rand.Next(opponent.Grid.Size);
             } while (opponent.Grid.IsShot(cursorX, cursorY));
+
             opponent.Grid.Shoot(cursorX, cursorY);
             opponent.Grid.Render(true, 0, 2); // Render player's grid
             return opponent.Grid.AllShipsSunk();
+        }
+        private List<int[]> targets = new List<int[]>(); // For keeping track of potential targets around a hit
+        private bool huntingMode = false; // Determines if the AI is currently hunting a ship after a hit
+        public bool AITurnNormal()
+        {
+            int x, y;
+
+            if (targets.Count == 0)
+            {
+                // No targets to hunt, return to random shots
+                huntingMode = false;
+            }
+
+            if (!huntingMode)
+            {
+                // Random shooting mode
+                do
+                {
+                    x = rand.Next(opponent.Grid.Size);
+                    y = rand.Next(opponent.Grid.Size);
+                } while (opponent.Grid.IsShot(x, y));
+
+                if (opponent.Grid.Shoot(x, y))
+                {
+                    // If a ship is hit, switch to hunting mode and add adjacent cells to targets
+                    huntingMode = true;
+                    AddAdjacentTargets(x, y);
+                }
+            }
+            else
+            {
+                // Hunting mode: focus on adjacent targets
+                x = targets[0][0];
+                y = targets[0][1];
+                targets.RemoveAt(0);
+
+                if (opponent.Grid.IsShot(x,y))
+                {
+                    return AITurnNormal();
+                }
+                if (opponent.Grid.Shoot(x, y))
+                {
+                    // If the shot hits, add more adjacent cells for further hunting
+                    AddAdjacentTargets(x, y);
+                }
+            }
+
+            opponent.Grid.Render(true, 0, 2); // Render player's grid
+            return opponent.Grid.AllShipsSunk();
+        }
+        private List<int[]> checkerboardTargets = new List<int[]>();
+
+        public bool AITurnHard()
+        {
+            if (checkerboardTargets.Count == 0)
+            {
+                InitializeCheckerboardTargets();
+            }
+
+            int x, y;
+
+            if (targets.Count > 0)
+            {
+                // Hunting mode: focus on adjacent targets
+                x = targets[0][0];
+                y = targets[0][1];
+                targets.RemoveAt(0);
+            }
+            else
+            {
+                // Checkerboard mode: choose the next target
+                x = checkerboardTargets[0][0];
+                y = checkerboardTargets[0][1];
+                checkerboardTargets.RemoveAt(0);
+            }
+
+            if (opponent.Grid.IsShot(x, y))
+            {
+                return AITurnHard();
+            }
+            if (opponent.Grid.Shoot(x, y))
+            {
+                // If a ship is hit, switch to hunting mode and add adjacent cells to targets
+                AddAdjacentTargets(x, y);
+            }
+
+            opponent.Grid.Render(true, 0, 2); // Render player's grid
+            return opponent.Grid.AllShipsSunk();
+        }
+        private void AddAdjacentTargets(int x, int y)
+        {
+            List<KeyValuePair<int, int>> neighbors = new List<KeyValuePair<int, int>>()
+                {
+                    {new KeyValuePair<int, int>(1, 0)},
+                    {new KeyValuePair<int, int>(-1, 0)},
+                    {new KeyValuePair<int, int>(0, 1)},
+                    {new KeyValuePair<int, int>(0, -1)}
+                };
+            // Checking neighbors
+            foreach (KeyValuePair<int, int> entry in neighbors)
+            {
+                int newX = x + entry.Key;
+                int newY = y + entry.Value;
+                if (newX >= 0 && newX < opponent.Grid.Size && newY >= 0 && newY < opponent.Grid.Size && !opponent.Grid.IsShot(newX, newY))
+                {
+                    targets.Add(new int[] { newX, newY });
+                }
+            }
+        }
+        private void InitializeCheckerboardTargets()
+        {
+            checkerboardTargets.Clear();
+            for (int i = 0; i < opponent.Grid.Size; i++)
+            {
+                for (int j = 0; j < opponent.Grid.Size; j++)
+                {
+                    // Only target cells in a checkerboard pattern
+                    if ((i + j) % 2 == 0)
+                    {
+                        checkerboardTargets.Add(new int[] { i, j });
+                    }
+                }
+            }
+        }
+        public void SetDifficulty(int diff)
+        {
+            difficulty = diff;
         }
     }
 }
