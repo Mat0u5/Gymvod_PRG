@@ -15,13 +15,13 @@ namespace ConsoleTetris
 
         private static readonly int[][,] Shapes = new int[][,]
         {
-            new int[,] { { 1, 1, 1, 1 } }, // I
-            new int[,] { { 1, 1 }, { 1, 1 } }, // O
-            new int[,] { { 0, 1, 0 }, { 1, 1, 1 } }, // T
-            new int[,] { { 1, 0, 0 }, { 1, 1, 1 } }, // L
-            new int[,] { { 0, 0, 1 }, { 1, 1, 1 } }, // J
-            new int[,] { { 1, 1, 0 }, { 0, 1, 1 } }, // S
-            new int[,] { { 0, 1, 1 }, { 1, 1, 0 } }  // Z
+            new int[,] { { 1, 1, 1, 1 } },              // I Piece
+            new int[,] { { 1, 1 }, { 1, 1 } },          // O Piece
+            new int[,] { { 0, 1, 0 }, { 1, 1, 1 } },    // T Piece
+            new int[,] { { 1, 0, 0 }, { 1, 1, 1 } },    // L Piece
+            new int[,] { { 0, 0, 1 }, { 1, 1, 1 } },    // J Piece
+            new int[,] { { 1, 1, 0 }, { 0, 1, 1 } },    // S Piece
+            new int[,] { { 0, 1, 1 }, { 1, 1, 0 } }     // Z Piece
         };
 
         private static ConsoleColor[] Colors = new ConsoleColor[]
@@ -102,7 +102,7 @@ namespace ConsoleTetris
 
         public void Drop(GameBoard board)
         {
-            while (Move(0, 1, board)) { }
+            while (Move(0, 1, board)) {}
         }
     }
 }

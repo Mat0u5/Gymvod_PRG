@@ -31,8 +31,12 @@ namespace ConsoleTetris
                     {
                         int newX = x + col;
                         int newY = y + row;
-                        if (newX < 0 || newX >= width || newY >= height || (newY >= 0 && board[newY, newX] == 1))
+                        if (newX < 0 || newX >= width || 
+                            newY >= height || 
+                            (newY >= 0 && board[newY, newX] == 1))
+                        {
                             return false;
+                        }
                     }
             return true;
         }
@@ -41,8 +45,12 @@ namespace ConsoleTetris
         {
             for (int row = 0; row < piece.Shape.GetLength(0); row++)
                 for (int col = 0; col < piece.Shape.GetLength(1); col++)
+                {
                     if (piece.Shape[row, col] == 1)
+                    {
                         board[piece.Y + row, piece.X + col] = 1;
+                    }
+                }
         }
 
         public int ClearLines()
@@ -52,7 +60,12 @@ namespace ConsoleTetris
             {
                 bool full = true;
                 for (int x = 0; x < width; x++)
-                    if (board[y, x] == 0) full = false;
+                {
+                    if (board[y, x] == 0)
+                    {
+                        full = false;
+                    }
+                }
                 if (full)
                 {
                     linesCleared++;
@@ -118,7 +131,9 @@ namespace ConsoleTetris
             ClearBox(37, 10, 8, 3);
             // Draw held piece
             if (Program.heldPiece != null)
+            {
                 Program.heldPiece.Draw(3, 10);
+            }
 
             // Draw next piece
             Program.nextPiece.Draw(37, 10);
