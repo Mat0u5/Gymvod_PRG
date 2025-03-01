@@ -9,23 +9,28 @@ namespace ConsoleTetris
 {
     internal class Program
     {
-        public static GameBoard board;
-        public static Piece currentPiece, nextPiece, heldPiece;
+        public static IGameBoard board;
+        public static IGamePiece currentPiece, nextPiece, heldPiece;
         public static bool canHold;
-        public static PlayerInput input = new PlayerInput();
+        public static PlayerInput input;
         public static Random rand = new Random();
         public static int score = 0;
         public static int highScore = 0;
         static int speed = 500;
         static bool gameOver = false;
         public static int ticks = 0;
+        static GameElementFactory factory;
+
         static void Main(string[] args)
         {
+            factory = new TetrisGameElementFactory();
+
             while (true)
             {
                 Console.CursorVisible = false;
                 Console.Clear();
-                board = new GameBoard(10, 20, 14, 8);
+                board = factory.CreateGameBoard(10, 20, 14, 8);
+                input = factory.CreateInputHandler();
                 board.DrawStaticElements();
                 score = 0;
                 speed = 500;
@@ -45,11 +50,12 @@ namespace ConsoleTetris
                     }
                     ticks++;
                 }
-                Console.SetCursorPosition(15, board.startY + board.height + 4);
+                Console.SetCursorPosition(15, board.getStartY() + board.getHeight() + 4);
                 board.DrawGameOver();
                 Console.ReadKey();
             }
         }
+
         static void GameLoop()
         {
             GameBoard.drawing = true;

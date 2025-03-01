@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ConsoleTetris
 {
-    internal class Piece
+    internal class Piece : IGamePiece
     {
-        public int X;
-        public int Y;
-        public int[,] Shape;
-        public ConsoleColor Color;
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int[,] Shape { get; private set; }
+        public ConsoleColor Color { get; private set; }
 
         private static readonly int[][,] Shapes = new int[][,]
         {
@@ -27,7 +27,7 @@ namespace ConsoleTetris
         private static ConsoleColor[] Colors = new ConsoleColor[]
         {
             ConsoleColor.Cyan, ConsoleColor.Yellow, ConsoleColor.Magenta,
-            ConsoleColor.DarkYellow, ConsoleColor.Blue, ConsoleColor.Green,ConsoleColor.Red
+            ConsoleColor.DarkYellow, ConsoleColor.Blue, ConsoleColor.Green, ConsoleColor.Red
         };
 
         public Piece(int[,] shape, ConsoleColor color)
@@ -38,13 +38,13 @@ namespace ConsoleTetris
             Y = 0;
         }
 
-        public static Piece GenerateRandomPiece(Random rand)
+        public static IGamePiece GenerateRandomPiece(Random rand)
         {
             int index = rand.Next(Shapes.Length);
             return new Piece(Shapes[index], Colors[index]);
         }
 
-        public bool Move(int dx, int dy, GameBoard board)
+        public bool Move(int dx, int dy, IGameBoard board)
         {
             if (board.IsValidMove(X + dx, Y + dy, Shape))
             {
@@ -55,7 +55,7 @@ namespace ConsoleTetris
             return false;
         }
 
-        public void Rotate(GameBoard board)
+        public void Rotate(IGameBoard board)
         {
             int rows = Shape.GetLength(0);
             int cols = Shape.GetLength(1);
@@ -100,7 +100,7 @@ namespace ConsoleTetris
             Y = 1;
         }
 
-        public void Drop(GameBoard board)
+        public void Drop(IGameBoard board)
         {
             while (Move(0, 1, board)) {}
         }

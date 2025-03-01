@@ -6,13 +6,31 @@ using System.Threading.Tasks;
 
 namespace ConsoleTetris
 {
-    internal class GameBoard
+    internal class GameBoard : IGameBoard
     {
         public static Boolean drawing = false;
         public static Boolean drawingPiece = false;
         const int borderWidth = 1;
-        public int width, height, startX, startY;
-        int[,] board;
+
+        private int width, height, startX, startY;
+        private int[,] board;
+
+        public int getWidth()
+        {
+            return width;
+        }
+        public int getHeight()
+        {
+            return height;
+        }
+        public int getStartX()
+        {
+            return startX;
+        }
+        public int getStartY()
+        {
+            return startY;
+        }
 
         public GameBoard(int w, int h, int x, int y)
         {
@@ -41,7 +59,7 @@ namespace ConsoleTetris
             return true;
         }
 
-        public void PlacePiece(Piece piece)
+        public void PlacePiece(IGamePiece piece)
         {
             for (int row = 0; row < piece.Shape.GetLength(0); row++)
                 for (int col = 0; col < piece.Shape.GetLength(1); col++)

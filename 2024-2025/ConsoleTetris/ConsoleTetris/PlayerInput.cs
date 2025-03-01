@@ -18,7 +18,7 @@ namespace ConsoleTetris
                     case ConsoleKey.C:
                         if (Program.canHold)
                         {
-                            Piece temp = Program.heldPiece;
+                            IGamePiece temp = Program.heldPiece;
                             Program.heldPiece = Program.currentPiece;
                             if (temp == null)
                             {
@@ -45,7 +45,8 @@ namespace ConsoleTetris
                         Program.currentPiece.Move(1, 0, Program.board);
                         break;
                     case ConsoleKey.DownArrow:
-                        if (Program.currentPiece.Move(0, 1, Program.board)) {
+                        if (Program.currentPiece.Move(0, 1, Program.board))
+                        {
                             Program.score++;
                         }
                         break;
