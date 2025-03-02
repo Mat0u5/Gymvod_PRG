@@ -27,6 +27,7 @@ namespace ConsoleTetris
 
             while (true)
             {
+                // Initialize variables
                 Console.CursorVisible = false;
                 Console.Clear();
                 board = factory.CreateGameBoard(10, 20, 14, 8);
@@ -42,6 +43,7 @@ namespace ConsoleTetris
                 heldPiece = null;
                 while (!gameOver && !GameBoard.drawing && !GameBoard.drawingPiece)
                 {
+                    //Handle inputs every 5ms, and run game loop every 500ms
                     Thread.Sleep(5);
                     input.HandleInput(rand);
                     if (ticks % 100 == 0)
@@ -50,6 +52,7 @@ namespace ConsoleTetris
                     }
                     ticks++;
                 }
+                // The game has ended
                 Console.SetCursorPosition(15, board.getStartY() + board.getHeight() + 4);
                 board.DrawGameOver();
                 Console.ReadKey();
@@ -58,11 +61,14 @@ namespace ConsoleTetris
 
         static void GameLoop()
         {
+            // Runs once every 0.5 seconds
             GameBoard.drawing = true;
             if (!currentPiece.Move(0, 1, board))
             {
+                // If it couldn't move the piece (piece is touching the floor)
                 board.PlacePiece(currentPiece);
                 score += board.ClearLines() * 100;
+                //Increase speeeeeeeeeddd
                 if (score > highScore) highScore = score;
                 speed = Math.Max(100, 500 - (score / 500) * 50);
                 currentPiece = nextPiece;
@@ -70,6 +76,7 @@ namespace ConsoleTetris
                 canHold = true;
                 if (!board.IsValidMove(currentPiece.X, currentPiece.Y, currentPiece.Shape))
                 {
+                    // If the next piece doesn't have a valid position to spawn in, end the game.
                     gameOver = true;
                 }
             }

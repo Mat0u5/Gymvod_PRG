@@ -43,6 +43,7 @@ namespace ConsoleTetris
 
         public bool IsValidMove(int x, int y, int[,] shape)
         {
+            //Checks if the new position is in bounds of the board
             for (int row = 0; row < shape.GetLength(0); row++)
                 for (int col = 0; col < shape.GetLength(1); col++)
                     if (shape[row, col] == 1)
@@ -73,12 +74,15 @@ namespace ConsoleTetris
 
         public int ClearLines()
         {
+            //Checks if any lines can be cleared, and clears them if it can find any
             int linesCleared = 0;
             for (int y = height - 1; y >= 0; y--)
             {
+                //Goes from top to bottom of the board
                 bool full = true;
                 for (int x = 0; x < width; x++)
                 {
+                    //Checks if any blocks in the current row are empty
                     if (board[y, x] == 0)
                     {
                         full = false;
@@ -86,6 +90,7 @@ namespace ConsoleTetris
                 }
                 if (full)
                 {
+                    // If no empty blocks are found in this row, it can be cleared -> moves the board down
                     linesCleared++;
                     for (int yy = y; yy > 0; yy--)
                         for (int x = 0; x < width; x++)
@@ -138,6 +143,7 @@ namespace ConsoleTetris
                 for (int x = 0; x < width; x++)
                 {
                     bool isPartOfPiece = Program.currentPiece.Occupies(x, y);
+                    //Draws pieces / empty space.
                     Console.ForegroundColor = isPartOfPiece ? Program.currentPiece.Color : ConsoleColor.DarkGray;
                     Console.Write(isPartOfPiece || board[y, x] == 1 ? "██" : " .");
                 }
@@ -145,6 +151,7 @@ namespace ConsoleTetris
             Console.SetCursorPosition(12, startY + height + 2);
             Console.WriteLine($"Score: {Program.score}    High Score: {Program.highScore}");
 
+            //Clear boxes where held piece and next piece is
             ClearBox(3, 10, 8, 3);
             ClearBox(37, 10, 8, 3);
             // Draw held piece
