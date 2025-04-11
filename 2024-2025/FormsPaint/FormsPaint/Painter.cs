@@ -10,19 +10,19 @@ namespace FormsPaint
 {
     internal class Painter
     {
-        private Graphics panelGraphics;
-        private Graphics bitmapGraphics;
-        private Bitmap currentBitmap;
+        public Graphics panelGraphics;
+        public Graphics bitmapGraphics;
+        public Bitmap currentBitmap;
         public Panel paintPanel;
 
-        public float LastMouseX { get; private set; }
-        public float LastMouseY { get; private set; }
-        public float StartStrokeX { get; private set; } = float.MinValue;
-        public float StartStrokeY { get; private set; } = float.MinValue;
-        public float Thickness { get; private set; }
-        public Color SelectedColor { get; private set; }
-        public string CurrentPaintMode { get; set; } = "pen";
-        public MouseButtons LastMouseButton { get; private set; }
+        public float LastMouseX;
+        public float LastMouseY;
+        public float StartStrokeX = float.MinValue;
+        public float StartStrokeY = float.MinValue;
+        public float Thickness;
+        public Color SelectedColor;
+        public string CurrentPaintMode = "pen";
+        public MouseButtons LastMouseButton;
         public bool IsStrokeStarted => StartStrokeX != float.MinValue && StartStrokeY != float.MinValue;
 
         private float[] lastThicknesses;
@@ -82,18 +82,20 @@ namespace FormsPaint
 
         public void DrawLine(float toX, float toY)
         {
+            //Line Drawing
             if (LastMouseX < 0 || LastMouseY < 0) return;
 
             float currentThickness = Thickness;
 
             if (CurrentPaintMode == "caligraphyPen")
             {
+                //Scales the thickness based on the pen speed
                 float[] moveVector = { LastMouseX - toX, LastMouseY - toY };
                 float vectorSize = GetVectorSize(moveVector);
+                if (vectorSize == 0) vectorSize = 1000;
                 if (vectorSize < 1) vectorSize = 1;
 
-                currentThickness = ((Thickness / (vectorSize / 4) * 16) + lastThicknesses[4] * 8 +
-                                   lastThicknesses[3] * 4 + lastThicknesses[2] * 2 + lastThicknesses[1] * 1) / 31;
+                currentThickness = ((Thickness / (vectorSize / 4) * 16) + lastThicknesses[4] * 8 + lastThicknesses[3] * 4 + lastThicknesses[2] * 2 + lastThicknesses[1] * 1) / 31;
 
                 if (currentThickness < 2) currentThickness = 2;
                 if (currentThickness > Thickness) currentThickness = Thickness;
@@ -108,24 +110,16 @@ namespace FormsPaint
 
             Pen pen = new Pen(SelectedColor, currentThickness);
             SolidBrush brush = new SolidBrush(SelectedColor);
-
+            //Draws the actual line + a circle at the end, which fixes the weird looking lines when changing directions.
             panelGraphics.DrawLine(pen, LastMouseX, LastMouseY, toX, toY);
             bitmapGraphics.DrawLine(pen, LastMouseX, LastMouseY, toX, toY);
-            panelGraphics.FillEllipse(brush, toX - currentThickness / 2, toY - currentThickness / 2,
-                                    currentThickness, currentThickness);
-            bitmapGraphics.FillEllipse(brush, toX - currentThickness / 2, toY - currentThickness / 2,
-                                     currentThickness, currentThickness);
+            panelGraphics.FillEllipse(brush, toX - currentThickness / 2, toY - currentThickness / 2, currentThickness, currentThickness);
+            bitmapGraphics.FillEllipse(brush, toX - currentThickness / 2, toY - currentThickness / 2, currentThickness, currentThickness);
         }
 
-        public void DrawSpecificLine(float fromX, float fromY, float toX, float toY)
+        public void DrawBitmap(Bitmap bitmap)
         {
-            Pen pen = new Pen(SelectedColor, Thickness);
-            panelGraphics.DrawLine(pen, fromX, fromY, toX, toY);
-            bitmapGraphics.DrawLine(pen, fromX, fromY, toX, toY);
-        }
-
-        public void RedrawBitmap(Bitmap bitmap)
-        {
+            //Draws a bitmap on the current screen
             if (bitmap == null) return;
 
             panelGraphics.Clear(Color.White);
@@ -147,6 +141,7 @@ namespace FormsPaint
 
         public void FloodFill(Point startPoint)
         {
+            //A fill algorithm that i found online (mine was way too slow)
             Color targetColor = currentBitmap.GetPixel(startPoint.X, startPoint.Y);
             if (targetColor.ToArgb() == SelectedColor.ToArgb()) return;
 
@@ -181,7 +176,7 @@ namespace FormsPaint
                 }
             }
 
-            RedrawBitmap(currentBitmap);
+            DrawBitmap(currentBitmap);
         }
 
         private float GetVectorSize(float[] vector)

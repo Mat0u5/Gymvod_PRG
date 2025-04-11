@@ -9,6 +9,7 @@ namespace FormsPaint
 {
     internal class CanvasUndo
     {
+        //Stores a history of the bitmaps
         private List<Bitmap> bitmapHistory = new List<Bitmap>();
         private Painter painter;
 
@@ -25,11 +26,17 @@ namespace FormsPaint
 
         public void Undo()
         {
-            if (bitmapHistory.Count < 2) return;
+            if (bitmapHistory.Count <= 0) return;
 
-            Bitmap lastBitmap = bitmapHistory[bitmapHistory.Count - 2];
+            if (bitmapHistory.Count >= 2)
+            {
+                painter.DrawBitmap(bitmapHistory[bitmapHistory.Count - 2]);
+            }
+            else
+            {
+                painter.ClearCanvas();
+            }
             bitmapHistory.RemoveAt(bitmapHistory.Count - 1);
-            painter.RedrawBitmap(lastBitmap);
         }
     }
 }

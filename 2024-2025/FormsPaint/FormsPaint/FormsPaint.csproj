@@ -111,6 +111,7 @@
     <Content Include="Resources\pen.png" />
     <Content Include="Resources\rectangle.png" />
     <Content Include="Resources\save.png" />
+    <None Include="Resources\selected.png" />
     <Content Include="Resources\undo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

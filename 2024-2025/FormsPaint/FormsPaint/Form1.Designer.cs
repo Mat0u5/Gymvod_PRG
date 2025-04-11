@@ -169,6 +169,7 @@
             // 
             // penBox_pen
             // 
+            this.penBox_pen.BackgroundImage = global::FormsPaint.Properties.Resources.selected;
             this.penBox_pen.Image = global::FormsPaint.Properties.Resources.pen;
             this.penBox_pen.Location = new System.Drawing.Point(854, 112);
             this.penBox_pen.Name = "penBox_pen";

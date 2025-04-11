@@ -30,6 +30,7 @@ namespace FormsPaint
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
+                //Loads the selected image into the canvas, making sure it fully fits (resising if necessary)
                 Bitmap image = new Bitmap(dialog.FileName);
                 Panel panel = painter.paintPanel;
 
@@ -49,6 +50,7 @@ namespace FormsPaint
 
         public void SaveFile()
         {
+            //Saves the current crawing as a file5
             SaveFileDialog dialog = new SaveFileDialog
             {
                 FileName = "formsPaintSave",

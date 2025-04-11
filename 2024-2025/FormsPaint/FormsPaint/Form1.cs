@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FormsPaint.Properties;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -25,6 +26,7 @@ namespace FormsPaint
         private CanvasUndo undoManager;
         private ShapeDrawer shapeDrawer;
         private FileManager fileManager;
+        private PictureBox selectedPictureBox;
         private const string PEN_MODE = "pen";
         private const string ERASER_MODE = "eraser";
         private const string CALLIGRAPHY_MODE = "caligraphyPen";
@@ -40,6 +42,7 @@ namespace FormsPaint
 
         private void onLoad(object sender, EventArgs e)
         {
+            //Initializes all the variables
             painter = new Painter(paintPanel);
             undoManager = new CanvasUndo(painter);
             shapeDrawer = new ShapeDrawer(painter);
@@ -48,22 +51,34 @@ namespace FormsPaint
             painter.Initialize();
             painter.SetThickness(15);
             painter.SetColor(Color.Blue);
+
+            thicknessSlider.Value = 15;
+            selectedPictureBox = penBox_pen;
         }
 
         private void pictureBoxClickEvent(object sender, EventArgs e)
         {
+            //Clicked on a "button" that changes the draw behaviour
             PictureBox pictureBox = (PictureBox)sender;
             
             if (pictureBox.Name.Contains("_"))
             {
+                // I made all the "paint" type buttons start with "_" so that i don't have to check for each button name individually
                 string mode = pictureBox.Name.Split('_')[1];
                 if (painter.CurrentPaintMode == ERASER_MODE && mode != ERASER_MODE)
+                {
                     painter.SetColor(currentColorBox.BackColor);
+                }
                 
                 painter.CurrentPaintMode = mode;
                 
                 if (mode == ERASER_MODE)
+                {
                     painter.SetColor(Color.White);
+                }
+                if (selectedPictureBox != null) selectedPictureBox.BackgroundImage = null;
+                pictureBox.BackgroundImage = Resources.selected;
+                selectedPictureBox = pictureBox;
             }
             
             if (pictureBox.Equals(loadImageBox))
@@ -96,13 +111,16 @@ namespace FormsPaint
 
         private void panelMouseDrawEvent(object sender, MouseEventArgs e)
         {
+            // Mouse move event
             float mouseX = e.Location.X;
             float mouseY = e.Location.Y;
             
             if (e.Button == MouseButtons.Left)
             {
+                //Left mouse button pressed
                 if (!painter.IsStrokeStarted)
                 {
+                    //Starts the stroke, or fills if the fill bucket is selected
                     painter.StartStroke(mouseX, mouseY);
                     
                     if (painter.CurrentPaintMode == FLOOD_MODE)
@@ -111,15 +129,11 @@ namespace FormsPaint
                     }
                 }
 
-                if (painter.CurrentPaintMode == PEN_MODE || 
-                    painter.CurrentPaintMode == ERASER_MODE || 
-                    painter.CurrentPaintMode == CALLIGRAPHY_MODE)
+                if (painter.CurrentPaintMode == PEN_MODE || painter.CurrentPaintMode == ERASER_MODE || painter.CurrentPaintMode == CALLIGRAPHY_MODE)
                 {
                     painter.DrawLine(mouseX, mouseY);
                 }
-                else if (painter.CurrentPaintMode == ELLIPSE_MODE || 
-                         painter.CurrentPaintMode == RECTANGLE_MODE || 
-                         painter.CurrentPaintMode == LINE_MODE)
+                else if (painter.CurrentPaintMode == ELLIPSE_MODE || painter.CurrentPaintMode == RECTANGLE_MODE || painter.CurrentPaintMode == LINE_MODE)
                 {
                     shapeDrawer.DrawShape(mouseX, mouseY, painter.CurrentPaintMode, true);
                 }
@@ -127,9 +141,8 @@ namespace FormsPaint
             
             if (e.Button != MouseButtons.Left && painter.LastMouseButton == MouseButtons.Left)
             {
-                if (painter.CurrentPaintMode == ELLIPSE_MODE || 
-                    painter.CurrentPaintMode == RECTANGLE_MODE || 
-                    painter.CurrentPaintMode == LINE_MODE)
+                //End of a stroke - draws the shape if selected, and saves the current canvas to be able to undo the move
+                if (painter.CurrentPaintMode == ELLIPSE_MODE || painter.CurrentPaintMode == RECTANGLE_MODE || painter.CurrentPaintMode == LINE_MODE)
                 {
                     shapeDrawer.DrawShape(mouseX, mouseY, painter.CurrentPaintMode, false);
                 }
@@ -143,6 +156,7 @@ namespace FormsPaint
 
         private void sliderEvent(object sender, EventArgs e)
         {
+            //Thickness slider changed value - gotta match the text box thickness display
             System.Windows.Forms.TrackBar slider = (System.Windows.Forms.TrackBar)sender;
             
             if (slider.Equals(thicknessSlider))
@@ -154,6 +168,7 @@ namespace FormsPaint
 
         private void thicknessTextBoxChange(object sender, EventArgs e)
         {
+            //Text box thicknesschanged value - gotta match the slider thickness
             if (int.TryParse(thicknessTextBox.Text, out int newThickness))
             {
                 painter.SetThickness(newThickness);
