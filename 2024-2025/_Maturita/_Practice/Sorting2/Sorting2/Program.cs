@@ -1,20 +1,19 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sorting
+namespace Sorting2
 {
     internal class Program
     {
         static void Main(string[] args)
         {
             int[] array = GenerateRandomArray(15);
-            BubbleSort((int[]) array.Clone());
-            InsertionSort((int[]) array.Clone());
-            SelectionSort((int[]) array.Clone());
+            BubbleSort((int[])array.Clone());
+            InsertionSort((int[])array.Clone());
+            SelectionSort((int[])array.Clone());
 
             Console.ReadKey();
         }
@@ -45,15 +44,15 @@ namespace Sorting
         static void BubbleSort(int[] arr)
         {
             Console.Write("Bubble sort: \t\t");
-            for (int i = 0; i < arr.Length-1; i++)
+            for(int i = 0; i < arr.Length-1; i++)
             {
-                for (int j = 0; j < arr.Length - i - 1; j++)
+                for (int j = 0; j < arr.Length-i-1; j++)
                 {
                     if (arr[j] > arr[j+1])
                     {
-                        int temp = arr[j + 1];
-                        arr[j + 1] = arr[j];
-                        arr[j] = temp;
+                        int temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
                     }
                 }
             }
@@ -66,11 +65,11 @@ namespace Sorting
             {
                 for (int j = i; j > 0; j--)
                 {
-                    if (arr[j] < arr[j - 1])
+                    if (arr[j] < arr[j-1])
                     {
                         int temp = arr[j];
                         arr[j] = arr[j - 1];
-                        arr[j - 1] = temp;
+                        arr[j-1] = temp;
                     }
                 }
             }
@@ -79,7 +78,7 @@ namespace Sorting
         static void SelectionSort(int[] arr)
         {
             Console.Write("Selection sort: \t");
-            for(int i = 0; i < arr.Length - 1; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
                 int smallestIndex = i;
                 for (int j = i; j < arr.Length; j++)
@@ -89,7 +88,6 @@ namespace Sorting
                         smallestIndex = j;
                     }
                 }
-
                 int temp = arr[i];
                 arr[i] = arr[smallestIndex];
                 arr[smallestIndex] = temp;
