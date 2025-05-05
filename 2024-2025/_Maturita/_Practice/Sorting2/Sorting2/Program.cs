@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@ namespace Sorting2
         static void BubbleSort(int[] arr)
         {
             Console.Write("Bubble sort: \t\t");
-            for(int i = 0; i < arr.Length-1; i++)
+            for (int i = 0; i < arr.Length-1; i++)
             {
                 for (int j = 0; j < arr.Length-i-1; j++)
                 {
