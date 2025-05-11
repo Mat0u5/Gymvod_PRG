@@ -1,0 +1,9 @@
+body {
+    background-image: url("back.GIF");
+}
+h1 {
+    color: blue;
+    align-self: center;
+    align-items: center;
+    text-align: center;
+}
